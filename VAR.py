@@ -1,4 +1,5 @@
 import numpy as np
+from Performance import Diagnostics
 
 class Var:
     def __init__(self, data, df):
@@ -30,11 +31,19 @@ class Var:
         td_estimate = np.matmul(X, b_td)
         rrp_estimate = np.matmul(X, b_rrp)
 
+        p = len(self.df.columns)
+        diagn = Diagnostics(self.data, y_td, b_td, p)
+        R = diagn.rsquared()
+        M = diagn.MSE()
+        F = diagn.Fstat()
+        print(f"The R-squared is: {round(R, 2)}")
+        print(f"The MSE is: {round(M, 2)}")
+        print(f"The F-statistic is: {round(F, 2)}")
 
     def normalEquations(self, X, y):
         #calculation of normal equations
-        XtX = np.matmil(X.T, X)
-        Xty = np.matmil(X.t, y)
+        XtX = np.matmul(X.T, X)
+        Xty = np.matmul(X.T, y)
         XtX_Inv = np.linalg.inv(XtX)
 
         b = np.matmul(XtX_Inv, Xty)

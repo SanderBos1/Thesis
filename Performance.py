@@ -23,18 +23,18 @@ class Diagnostics:
         return SSreg
 
     def SSres(self):
-        SSres = np.matmul((self.y-np.matmul(self.data, self.b)).t, (self.y-np.matmul(self.data, self.b)))
+        SSres = np.matmul((self.y-np.matmul(self.data, self.b)).T, (self.y-np.matmul(self.data, self.b)))
         return SSres
 
-    def rsquared(self, n):
+    def rsquared(self):
         ssres = self.SSres()
         sstot = self.SStot()
-        R = 1 - ssres / (sstot - sum(self.y)**2/n)
+        R = 1 - ssres / (sstot - sum(self.y)**2/self.n)
         return R
 
     def MSE(self):
         ssres = self.SSres()
-        M = ssres/np
+        M = ssres/self.n
         return M
 
     def Fstat(self):
