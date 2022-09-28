@@ -3,7 +3,7 @@ from VAR import Var
 from sklearn.model_selection import train_test_split
 
 #defines how much lags you watch back
-optimal_lag = 10
+optimal_lag = 100
 
 # conversion of csv file to dataframe
 df = pd.read_csv("Data/PRICE_AND_DEMAND_202209_NSW1.csv")
@@ -24,7 +24,7 @@ for i in range(1, optimal_lag + 1):
         # add lag i of feature j to the dataframe
         df[f"{j}_Lag_{i}"] = df[j].shift(i)
 df = df.dropna()
-print(df)
 
+#var calculation
 VAR = Var(df)
 VAR.varCalculation()

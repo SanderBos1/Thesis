@@ -4,8 +4,9 @@ import numpy as np
 class Diagnostics:
 
     # y = Values of the dependent variable
-    # b = predicted parameters
-    # data = the real data
+    # b = Parameter estimates
+    # data = the data rows
+    # p =
 
     def __init__(self, data, y, b, p):
         self.data = data

@@ -49,23 +49,22 @@ class Var:
         test_rdd = y_RRP_test.to_numpy()
         test_data = test_data.to_numpy()
 
-        print("this is train data", train_data)
-        print("this is test data", test_data)
+
         # parameter estimate td
         b_td = self.normalEquations(train_data, train_td)
 
         # parameter estimate rrp
-        b_rrp = self.normalEquations(train_data, train_td)
+        b_rrp = self.normalEquations(train_data, train_rdd)
 
 
         td_estimate = np.matmul(train_data, b_td)
         rrp_estimate = np.matmul(train_data, b_rrp)
 
-        # prediction of future data
+        #Here starts the prediction code
 
-
-        diagn = Diagnostics(train_data, train_td, b_td, p)
-        diagn.results()
+        # calculation of diagnostics
+        diagntd = Diagnostics(train_data, train_td, b_td, p)
+        diagntd.results()
 
 
 
