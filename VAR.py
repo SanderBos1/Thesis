@@ -31,14 +31,14 @@ class Var:
         td_estimate = np.matmul(X, b_td)
         rrp_estimate = np.matmul(X, b_rrp)
 
+        #prediction of future data
+
+
         p = len(self.df.columns)
         diagn = Diagnostics(self.data, y_td, b_td, p)
-        R = diagn.rsquared()
-        M = diagn.MSE()
-        F = diagn.Fstat()
-        print(f"The R-squared is: {round(R, 2)}")
-        print(f"The MSE is: {round(M, 2)}")
-        print(f"The F-statistic is: {round(F, 2)}")
+        diagn.results()
+
+
 
     def normalEquations(self, X, y):
         #calculation of normal equations

@@ -42,3 +42,11 @@ class Diagnostics:
         ssreg = self.SSreg()
         F = (ssreg/self.p) / (ssres/(self.n-self.p))
         return F
+
+    def results(self):
+        R = self.rsquared()
+        M = self.MSE()
+        F = self.Fstat()
+        print(f"The R-squared is: {round(R, 2)}")
+        print(f"The MSE is: {round(M, 2)}")
+        print(f"The F-statistic is: {round(F, 2)}")
