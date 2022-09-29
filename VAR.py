@@ -61,9 +61,27 @@ class Var:
         rrp_estimate = np.matmul(train_data, b_rrp)
 
         #Here starts the prediction code
+        PointsAhead = 100
+        td_ahead = []
+        rrp_ahead = []
 
+        # loop over all variables in the test set
+        for j in range(len(test_data)):
+            x = test_data[-j].tolist()
+
+            for i in range(PointsAhead):
+                predicted_td = np.dot(x, b_td)
+                predicted_rrp = np.dot(x, b_rrp)
+
+                x = x[:-2]
+                x.insert(1, predicted_rrp)
+                x.insert(1, predicted_td)
+            td_ahead.append(predicted_td)
+            rrp_ahead.append(predicted_rrp)
+
+        td_ahead = np.array(td_ahead)
         # calculation of diagnostics
-        diagntd = Diagnostics(train_data, train_td, b_td, p)
+        diagntd = Diagnostics(test_data, td_ahead, b_td, p)
         diagntd.results()
 
 
