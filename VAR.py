@@ -46,7 +46,7 @@ class Var:
         train_rdd = y_RRP.to_numpy()
         train_data = train_data.to_numpy()
         test_td = y_TotalDemand_test.to_numpy()
-        test_rdd = y_RRP_test.to_numpy()
+        test_rrp= y_RRP_test.to_numpy()
         test_data = test_data.to_numpy()
 
 
@@ -56,18 +56,15 @@ class Var:
         # parameter estimate rrp
         b_rrp = self.normalEquations(train_data, train_rdd)
 
-
-        td_estimate = np.matmul(train_data, b_td)
-        rrp_estimate = np.matmul(train_data, b_rrp)
-
         #Here starts the prediction code
-        PointsAhead = 100
+        PointsAhead = 5
         td_ahead = []
         rrp_ahead = []
 
         # loop over all variables in the test set
         for j in range(len(test_data)):
-            x = test_data[-j].tolist()
+            x = test_data[j].tolist()
+            #print("this is the selected x", x)
 
             for i in range(PointsAhead):
                 predicted_td = np.dot(x, b_td)
@@ -76,13 +73,22 @@ class Var:
                 x = x[:-2]
                 x.insert(1, predicted_rrp)
                 x.insert(1, predicted_td)
-            td_ahead.append(predicted_td)
+
+            td_estimate = np.matmul(x, b_td)
+            td_ahead.append(td_estimate)
+
+            rrp_estimate = np.matmul(x, b_rrp)
             rrp_ahead.append(predicted_rrp)
 
         td_ahead = np.array(td_ahead)
+        rrp_ahead = np.array(rrp_ahead)
+
+
         # calculation of diagnostics
-        diagntd = Diagnostics(test_data, td_ahead, b_td, p)
+        diagntd = Diagnostics(td_ahead, test_td, p)
         diagntd.results()
+        diagnrrp = Diagnostics(rrp_ahead, test_rrp, p)
+        diagnrrp.results()
 
 
 

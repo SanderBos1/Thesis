@@ -1,4 +1,5 @@
 import numpy as np
+from statistics import mean
 
 
 class Diagnostics:
@@ -8,33 +9,35 @@ class Diagnostics:
     # data = the data rows
     # p =
 
-    def __init__(self, data, y, b, p):
+    def __init__(self, data, y, p):
         self.data = data
-        self.b = b
         self.y = y
         self.n = len(self.y)
         self.p = p
+        self.mean = mean(self.y)
 
     def SStot(self):
-        SStot = np.matmul(self.y.T, self.y)
+        SStot = np.sum((self.y - self.mean)**2)
         return SStot
 
     def SSreg(self):
-        SSreg = np.matmul(np.matmul(self.y.T, self.data), self.b)
+        SSreg = np.sum((self.data - self.mean)**2)
         return SSreg
 
     def SSres(self):
-        SSres = np.matmul((self.y-np.matmul(self.data, self.b)).T, (self.y-np.matmul(self.data, self.b)))
+        SSres = np.sum((self.y - self.data)**2)
         return SSres
 
     def rsquared(self):
         ssres = self.SSres()
         sstot = self.SStot()
-        R = 1 - ssres / (sstot - sum(self.y)**2/self.n)
+        R = 1 - ssres / sstot
         return R
 
     def MSE(self):
         ssres = self.SSres()
+        print(self.n)
+        print(ssres)
         M = ssres/self.n
         return M
 
