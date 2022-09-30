@@ -28,7 +28,7 @@ class Var:
 
         # drop columns that are not needed
         for i in features:
-            if i != ind_var:
+            if i not in ind_var:
                 self.data = self.data.drop([i], axis=1)
 
         # get column names
@@ -36,13 +36,12 @@ class Var:
 
 
         # loop through each lag
-        for i in range(1, self.optimal_lag + 1):
+        for i in range(1, self.optimal_lag+1):
             # loop through each of the features
             for j in features:
                 # add lag i of feature j to the dataframe
                 self.data[f"{j}_Lag_{i}"] = self.data[j].shift(i)
         self.data = self.data.dropna()
-
         # split in test and train data
 
         test_size = 0.2
@@ -50,19 +49,18 @@ class Var:
         p = len(train_data.columns)
 
         # extract the first variables.
-        y_TotalDemand = train_data[ind_var]
-        train_data = train_data.drop([ind_var], axis=1)
+        y_TotalDemand = train_data[ind_var[0]]
+        train_data = train_data.drop([ind_var[0]], axis=1)
 
         # insert intercept column with all value of 1
         train_data.insert(0, "Intercept", 1)
 
         # extract the first variables.
-        y_TotalDemand_test = test_data[ind_var]
-        test_data = test_data.drop([ind_var], axis=1)
+        y_TotalDemand_test = test_data[ind_var[0]]
+        test_data = test_data.drop([ind_var[0]], axis=1)
 
         # insert intercept column with all value of 1
         test_data.insert(0, "Intercept", 1)
-
         # transform to numpy for usage
 
 
@@ -72,7 +70,7 @@ class Var:
         test_data = test_data.to_numpy()
 
 
-        # parameter estimate td
+        # parameter estimate
         b = normalEquations(train_data, train_td)
 
         #Here starts the prediction code
@@ -97,7 +95,6 @@ class Var:
         diagntd = Diagnostics(prediction, test, p, self.optimal_lag)
         r, m, f, aic = diagntd.results()
         print(f"The R-squared is: {round(r, 2)}")
-        print(f"The MSE is: {round(m, 2)}")
         print(f"The F-statistic is: {round(f, 2)}")
         print(f"The aic is: {round(aic, 2)}")
         return r, m, f, aic, b
