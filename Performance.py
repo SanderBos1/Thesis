@@ -47,8 +47,8 @@ class Diagnostics:
         return F
 
     def Akaike(self):
-        mse = self.MSE()
-        aic = 2 * (self.optimal_lag+1) - 2 * math.log(mse)
+        ssres = self.SSres()
+        aic = self.n * np.log(ssres/self.n) + 2*self.optimal_lag
         return aic
 
 

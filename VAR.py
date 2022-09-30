@@ -64,7 +64,7 @@ class Var:
         # insert intercept column with all value of 1
         train_data.insert(0, "Intercept", 1)
         test_data.insert(0, "Intercept", 1)
-        print(test_data)
+
         # transform to numpy for usage
         train_td = y_TotalDemand.to_numpy()
         train_data = train_data.to_numpy()
@@ -88,6 +88,7 @@ class Var:
                 x.insert(1, predicted_td)
 
             estimate = np.matmul(x, b)
+
             prediction.append(estimate)
 
         prediction = np.array(prediction)

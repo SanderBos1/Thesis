@@ -22,6 +22,7 @@ best_aic = 0
 best_f = 0
 best_lag_a = 0
 best_lag_b = 0
+best_r = 0
 
 for i in optimal_lag_a:
     VAR = Var(df, i, 0, PointsAhead)
@@ -32,13 +33,15 @@ for i in optimal_lag_a:
         found_parameters = b
         best_aic = aic
         best_f = f
-print("best_parameters",i, best_lag_b, best_aic, found_parameters)
+        best_r = r
+print("best_parameters",best_lag_a, best_lag_b, best_aic, found_parameters, r)
 
 #var calculation granger test
 best_aic = 0
 found_f = 0
 best_lag_b = 0
 best_lag_a = 0
+best_r = 0
 for i in optimal_lag_a:
     for j in optimal_lag_b:
         VAR = Var(df, i, j, PointsAhead)
@@ -50,7 +53,8 @@ for i in optimal_lag_a:
             found_f = f
             best_lag_a = i
             best_lag_b = j
-print("best parameters",best_lag_a, best_lag_b, best_aic, found_parameters)
+            best_r = r
+print("best parameters",best_lag_a, best_lag_b, best_aic, found_parameters, r)
 print(found_f)
 
 if found_f > best_f:
