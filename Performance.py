@@ -51,6 +51,4 @@ class Diagnostics:
         R = self.rsquared()
         M = self.MSE()
         F = self.Fstat()
-        print(f"The R-squared is: {round(R, 2)}")
-        print(f"The MSE is: {round(M, 2)}")
-        print(f"The F-statistic is: {round(F, 2)}")
+        return R, M, F

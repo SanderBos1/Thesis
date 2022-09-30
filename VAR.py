@@ -5,8 +5,10 @@ from sklearn.model_selection import train_test_split
 
 class Var:
 
-    def __init__(self, data):
+    def __init__(self, data, optimal_lag, PointsAhead):
         self.data = data
+        self.optimal_lag = optimal_lag
+        self.PointsAhead = PointsAhead
 
     """ Estimation of VAR models
     Input:
@@ -18,7 +20,27 @@ class Var:
     """
 
     def varCalculation(self):
+        #data preparation
+
+        # set columname as index
+        self.data = self.data.set_index("SETTLEMENTDATE")
+
+        # drop columns that are not needed
+        self.data = self.data.drop(["REGION", "PERIODTYPE"], axis=1)
+
+        # get column names
+        features = self.data.columns
+
+        # loop through each lag
+        for i in range(1, self.optimal_lag + 1):
+            # loop through each of the features
+            for j in features:
+                # add lag i of feature j to the dataframe
+                self.data[f"{j}_Lag_{i}"] = self.data[j].shift(i)
+        self.data = self.data.dropna()
+
         # split in test and train data
+
         test_size = 0.2
         train_data, test_data = train_test_split(self.data, test_size=test_size, shuffle=False)
         p = len(train_data.columns)
@@ -57,7 +79,7 @@ class Var:
         b_rrp = self.normalEquations(train_data, train_rdd)
 
         #Here starts the prediction code
-        PointsAhead = 5
+        # points ahead defines the amount of points we want to predict
         td_ahead = []
         rrp_ahead = []
 
@@ -66,7 +88,7 @@ class Var:
             x = test_data[j].tolist()
             #print("this is the selected x", x)
 
-            for i in range(PointsAhead):
+            for i in range(self.PointsAhead):
                 predicted_td = np.dot(x, b_td)
                 predicted_rrp = np.dot(x, b_rrp)
 
@@ -86,10 +108,11 @@ class Var:
 
         # calculation of diagnostics
         diagntd = Diagnostics(td_ahead, test_td, p)
-        diagntd.results()
-        diagnrrp = Diagnostics(rrp_ahead, test_rrp, p)
-        diagnrrp.results()
-
+        r, m, f = diagntd.results()
+        print(f"The R-squared is: {round(r, 2)}")
+        print(f"The MSE is: {round(m, 2)}")
+        print(f"The F-statistic is: {round(f, 2)}")
+        return r, m, f
 
 
     def normalEquations(self, X, y):
