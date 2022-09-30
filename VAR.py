@@ -8,9 +8,10 @@ import matplotlib.pyplot as plt
 
 class Var:
 
-    def __init__(self, data, optimal_lag, PointsAhead):
+    def __init__(self, data, optimal_lag_a, optimal_lag_b,  PointsAhead):
         self.data = data
-        self.optimal_lag = optimal_lag
+        self.optimal_lag_a = optimal_lag_a
+        self.optimal_lag_b = optimal_lag_b
         self.PointsAhead = PointsAhead
 
     """ Estimation of VAR models
@@ -22,7 +23,7 @@ class Var:
     e: the error term
     """
 
-    def varCalculation(self, ind_var, index):
+    def varCalculation(self, variables, index):
         #data preparation
 
         # set columname as index
@@ -31,17 +32,18 @@ class Var:
 
         # drop columns that are not needed
         for i in features:
-            if i not in ind_var:
+            if i not in variables:
                 self.data = self.data.drop([i], axis=1)
 
-        # get column names
-        features = self.data.columns
+        # loop through each of the features
 
-
-        # loop through each lag
-        for i in range(1, self.optimal_lag+1):
-            # loop through each of the features
-            for j in features:
+        for j in variables:
+            # loop through each lag
+            if j == variables[0]:
+                optimal_lag = self.optimal_lag_a
+            else:
+                optimal_lag = self.optimal_lag_b
+            for i in range(1, optimal_lag+1):
                 # add lag i of feature j to the dataframe
                 self.data[f"{j}_Lag_{i}"] = self.data[j].shift(i)
         self.data = self.data.dropna()
@@ -52,16 +54,15 @@ class Var:
         p = len(train_data.columns)
 
         # extract the first variables.
-        y_TotalDemand = train_data[ind_var[0]]
-        train_data = train_data.drop([ind_var[0]], axis=1)
+        y_TotalDemand = train_data[variables[0]]
+        train_data = train_data.drop([variables[0]], axis=1)
 
         # insert intercept column with all value of 1
         train_data.insert(0, "Intercept", 1)
 
         # extract the first variables.
-        y_TotalDemand_test = test_data[ind_var[0]]
-        test_data = test_data.drop([ind_var[0]], axis=1)
-        print(test_data)
+        y_TotalDemand_test = test_data[variables[0]]
+        test_data = test_data.drop([variables[0]], axis=1)
         # insert intercept column with all value of 1
         test_data.insert(0, "Intercept", 1)
         # transform to numpy for usage
@@ -95,7 +96,8 @@ class Var:
 
 
         # calculation of diagnostics
-        diagntd = Diagnostics(prediction, test, p, self.optimal_lag)
+        amount_var = self.optimal_lag_a + self.optimal_lag_b
+        diagntd = Diagnostics(prediction, test, p, amount_var)
         r, m, f, aic = diagntd.results()
         print(f"The R-squared is: {round(r, 2)}")
         print(f"The F-statistic is: {round(f, 2)}")
@@ -104,7 +106,6 @@ class Var:
 
 
     def varPlot(self, index, ind_var):
-        print(self.data)
         self.data.plot(x=index, y=ind_var, kind='line')
         plt.show()
 
