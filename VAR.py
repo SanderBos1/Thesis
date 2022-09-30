@@ -94,12 +94,13 @@ class Var:
 
 
         # calculation of diagnostics
-        diagntd = Diagnostics(prediction, test, p)
-        r, m, f = diagntd.results()
+        diagntd = Diagnostics(prediction, test, p, self.optimal_lag)
+        r, m, f, aic = diagntd.results()
         print(f"The R-squared is: {round(r, 2)}")
         print(f"The MSE is: {round(m, 2)}")
         print(f"The F-statistic is: {round(f, 2)}")
-        return r, m, f
+        print(f"The aic is: {round(aic, 2)}")
+        return r, m, f, aic, b
 
 
 

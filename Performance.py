@@ -1,6 +1,6 @@
 import numpy as np
 from statistics import mean
-
+import math
 
 class Diagnostics:
 
@@ -9,12 +9,13 @@ class Diagnostics:
     # data = the data rows
     # p =
 
-    def __init__(self, data, y, p):
+    def __init__(self, data, y, p, optimal_lag):
         self.data = data
         self.y = y
         self.n = len(self.y)
         self.p = p
         self.mean = mean(self.y)
+        self.optimal_lag = optimal_lag
 
     def SStot(self):
         SStot = np.sum((self.y - self.mean)**2)
@@ -36,8 +37,6 @@ class Diagnostics:
 
     def MSE(self):
         ssres = self.SSres()
-        print(self.n)
-        print(ssres)
         M = ssres/self.n
         return M
 
@@ -47,8 +46,15 @@ class Diagnostics:
         F = (ssreg/self.p) / (ssres/(self.n-self.p))
         return F
 
+    def Akaike(self):
+        mse = self.MSE()
+        aic = 2 * (self.optimal_lag+1) - 2 * math.log(mse)
+        return aic
+
+
     def results(self):
         R = self.rsquared()
         M = self.MSE()
         F = self.Fstat()
-        return R, M, F
+        aic = self.Akaike()
+        return R, M, F, aic
