@@ -21,6 +21,7 @@ best_f = 0
 
 for i in optimal_lag:
     VAR = Var(df, i, PointsAhead)
+    VAR.varPlot("SETTLEMENTDATE", dep_var)
     r, m, f, aic, b = VAR.varCalculation(dep_var, "SETTLEMENTDATE")
     if aic < best_aic or best_aic == 0:
         found_parameters = b
@@ -33,6 +34,7 @@ best_aic = 0
 found_f = 0
 for i in optimal_lag:
     VAR = Var(df, i, PointsAhead)
+
     r, m, f, aic, b = VAR.varCalculation(possible_granger, "SETTLEMENTDATE")
     if aic < best_aic or best_aic == 0:
         found_parameters = b

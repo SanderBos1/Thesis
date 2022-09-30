@@ -2,6 +2,9 @@ import numpy as np
 from Performance import Diagnostics
 from sklearn.model_selection import train_test_split
 from formulas import normalEquations, dotProduct
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
 
 class Var:
 
@@ -58,7 +61,7 @@ class Var:
         # extract the first variables.
         y_TotalDemand_test = test_data[ind_var[0]]
         test_data = test_data.drop([ind_var[0]], axis=1)
-
+        print(test_data)
         # insert intercept column with all value of 1
         test_data.insert(0, "Intercept", 1)
         # transform to numpy for usage
@@ -100,5 +103,9 @@ class Var:
         return r, m, f, aic, b
 
 
+    def varPlot(self, index, ind_var):
+        print(self.data)
+        self.data.plot(x=index, y=ind_var, kind='line')
+        plt.show()
 
 
