@@ -14,4 +14,6 @@ df = pd.read_csv("Data/PRICE_AND_DEMAND_202209_NSW1.csv")
 
 #var calculation
 VAR = Var(df, optimal_lag, PointsAhead)
-VAR.varCalculation()
+VAR.varCalculation("TOTALDEMAND", "SETTLEMENTDATE")
+VAR2 = Var(df, optimal_lag, PointsAhead)
+VAR2.varCalculation("RRP", "SETTLEMENTDATE")
