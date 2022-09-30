@@ -55,19 +55,17 @@ class Var:
 
         # extract the first variables.
         y_TotalDemand = train_data[variables[0]]
-        train_data = train_data.drop([variables[0]], axis=1)
+        y_TotalDemand_test = test_data[variables[0]]
+
+        for i in range(len(variables)):
+            train_data = train_data.drop([variables[i]], axis=1)
+            test_data = test_data.drop([variables[i]], axis=1)
 
         # insert intercept column with all value of 1
         train_data.insert(0, "Intercept", 1)
-
-        # extract the first variables.
-        y_TotalDemand_test = test_data[variables[0]]
-        test_data = test_data.drop([variables[0]], axis=1)
-        # insert intercept column with all value of 1
         test_data.insert(0, "Intercept", 1)
+        print(test_data)
         # transform to numpy for usage
-
-
         train_td = y_TotalDemand.to_numpy()
         train_data = train_data.to_numpy()
         test = y_TotalDemand_test.to_numpy()
@@ -99,9 +97,6 @@ class Var:
         amount_var = self.optimal_lag_a + self.optimal_lag_b
         diagntd = Diagnostics(prediction, test, p, amount_var)
         r, m, f, aic = diagntd.results()
-        print(f"The R-squared is: {round(r, 2)}")
-        print(f"The F-statistic is: {round(f, 2)}")
-        print(f"The aic is: {round(aic, 2)}")
         return r, m, f, aic, b
 
 
