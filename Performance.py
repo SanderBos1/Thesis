@@ -1,21 +1,20 @@
 import numpy as np
 from statistics import mean
-import math
+
 
 class Diagnostics:
-
     # y = Values of the dependent variable
     # b = Parameter estimates
     # data = the data rows
-    # p =
+    # optimal_lag = the amount of variables
 
-    def __init__(self, data, y, p, optimal_lag):
+    def __init__(self, data, y, optimal_lag):
         self.data = data
         self.y = y
         self.n = len(self.y)
-        self.p = p
         self.mean = mean(self.y)
         self.optimal_lag = optimal_lag
+        self.p = optimal_lag + 1
 
     def SStot(self):
         SStot = np.sum((self.y - self.mean)**2)

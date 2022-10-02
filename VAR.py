@@ -96,13 +96,15 @@ class Var:
 
         # calculation of diagnostics
         amount_var = self.optimal_lag_a + self.optimal_lag_b
-        diagntd = Diagnostics(prediction, test, p, amount_var)
+        diagntd = Diagnostics(prediction, test, amount_var)
         r, m, f, aic = diagntd.results()
         return r, m, f, aic, b
 
-
+    #makes a plot of the data
     def varPlot(self, index, ind_var):
         self.data.plot(x=index, y=ind_var, kind='line')
         plt.show()
+
+
 
 

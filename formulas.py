@@ -1,8 +1,9 @@
 import numpy as np
 
 
+# calculation of normal equations
+
 def normalEquations( X, y):
-    # calculation of normal equations
     XtX = np.matmul(X.T, X)
     Xty = np.matmul(X.T, y)
     XtX_Inv = np.linalg.inv(XtX)
@@ -11,6 +12,7 @@ def normalEquations( X, y):
 
     return b
 
+# calculates the dot product of two lists
 def dotProduct(x, b):
     predicted = 0
     for k in range(len(x)):
