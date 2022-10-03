@@ -8,11 +8,10 @@ import matplotlib.pyplot as plt
 
 class Var:
 
-    def __init__(self, data, optimal_lag_a, optimal_lag_b,  PointsAhead):
+    def __init__(self, data, optimal_lag_a, optimal_lag_b):
         self.data = data
         self.optimal_lag_a = optimal_lag_a
         self.optimal_lag_b = optimal_lag_b
-        self.PointsAhead = PointsAhead
 
     """ Estimation of VAR models
     Input:
@@ -36,7 +35,6 @@ class Var:
                 self.data = self.data.drop([i], axis=1)
 
         # loop through each of the features
-
         for j in variables:
             # loop through each lag
             if j == variables[0]:
@@ -47,8 +45,6 @@ class Var:
                 # add lag i of feature j to the dataframe
                 self.data[f"{j}_Lag_{i}"] = self.data[j].shift(i)
         self.data = self.data.dropna()
-
-        p = len(self.data.columns)
 
         # extract the first variables.
         y_True = self.data[variables[0]]
@@ -66,7 +62,6 @@ class Var:
         # parameter estimate
         b = normalEquations(self.data, y_True)
 
-
         # Calculated the y values with the help of the predicted parameters b
         y_values = []
         for i in self.data:
@@ -74,9 +69,8 @@ class Var:
             y_values.append(y)
         amount_var = self.optimal_lag_a + self.optimal_lag_b
         diagntd = Diagnostics(y_values, y_True, amount_var)
-        r, m, f, aic = diagntd.results()
-        print(aic)
-        return r, m, f, aic, b
+        r, f, aic = diagntd.results()
+        return r, f, aic
 
     #makes a plot of the data
     def varPlot(self, index, ind_var):

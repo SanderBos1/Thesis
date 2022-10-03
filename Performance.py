@@ -1,6 +1,7 @@
 import numpy as np
-from statistics import mean
-
+import statsmodels.tools.eval_measures
+from numpy import mean
+from statsmodels.tools.eval_measures import aic
 
 class Diagnostics:
     # y = Values of the dependent variable
@@ -46,14 +47,13 @@ class Diagnostics:
         return F
 
     def Akaike(self):
-        ssres = self.SSres()
-        aic = self.n * np.log(ssres/self.n) + 2*self.optimal_lag
+        MSE = self.MSE()
+        aic = statsmodels.tools.eval_measures.aic(MSE, self.n, self.optimal_lag)
         return aic
 
 
     def results(self):
         R = self.rsquared()
-        M = self.MSE()
         F = self.Fstat()
         aic = self.Akaike()
-        return R, M, F, aic
+        return R, F, aic
