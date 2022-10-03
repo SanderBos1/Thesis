@@ -47,57 +47,35 @@ class Var:
                 # add lag i of feature j to the dataframe
                 self.data[f"{j}_Lag_{i}"] = self.data[j].shift(i)
         self.data = self.data.dropna()
-        # split in test and train data
 
-        test_size = 0.2
-        train_data, test_data = train_test_split(self.data, test_size=test_size, shuffle=False)
-        p = len(train_data.columns)
+        p = len(self.data.columns)
 
         # extract the first variables.
-        y_TotalDemand = train_data[variables[0]]
-        y_TotalDemand_test = test_data[variables[0]]
+        y_True = self.data[variables[0]]
 
         for i in range(len(variables)):
-            train_data = train_data.drop([variables[i]], axis=1)
-            test_data = test_data.drop([variables[i]], axis=1)
+            self.data = self.data.drop([variables[i]], axis=1)
 
         # insert intercept column with all value of 1
-        train_data.insert(0, "Intercept", 1)
-        test_data.insert(0, "Intercept", 1)
+        self.data.insert(0, "Intercept", 1)
 
         # transform to numpy for usage
-        train_td = y_TotalDemand.to_numpy()
-        train_data = train_data.to_numpy()
-        test = y_TotalDemand_test.to_numpy()
-        test_data = test_data.to_numpy()
-
+        y_True = y_True.to_numpy()
+        self.data = self.data.to_numpy()
 
         # parameter estimate
-        b = normalEquations(train_data, train_td)
-
-        #Here starts the prediction code
-        # points ahead defines the amount of points we want to predict
-        prediction = []
-
-        # loop over all variables in the test set
-        for j in range(len(test_data)):
-            x = test_data[j].tolist()
-            for i in range(self.PointsAhead):
-                predicted_td = dotProduct(x, b)
-                x = x[:-1]
-                x.insert(1, predicted_td)
-
-            estimate = np.matmul(x, b)
-
-            prediction.append(estimate)
-
-        prediction = np.array(prediction)
+        b = normalEquations(self.data, y_True)
 
 
-        # calculation of diagnostics
+        # Calculated the y values with the help of the predicted parameters b
+        y_values = []
+        for i in self.data:
+            y = dotProduct(i, b)
+            y_values.append(y)
         amount_var = self.optimal_lag_a + self.optimal_lag_b
-        diagntd = Diagnostics(prediction, test, amount_var)
+        diagntd = Diagnostics(y_values, y_True, amount_var)
         r, m, f, aic = diagntd.results()
+        print(aic)
         return r, m, f, aic, b
 
     #makes a plot of the data

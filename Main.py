@@ -55,7 +55,7 @@ for k in dep_var:
                     best_lag_b = j
                     best_r = r
         print("best parameters",best_lag_a, best_lag_b, best_aic, found_parameters, best_r)
-        if found_f > best_f:
+        if found_f < best_f:
             print("there is granger causality")
         else:
             print("no granger causality")
