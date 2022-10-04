@@ -32,14 +32,22 @@ for k in dep_var:
     best_r = 0
     first_value = [k[0]]
     for j in k:
-       notwanted = []
-       for i in features:
+        aic_values = []
+        notwanted = []
+        for i in features:
             if i not in j:
                 notwanted.append(i)
-       VAR = Var(df, lag)
-       r,  f, aic = VAR.varCalculation(j, notwanted)
-       if aic < best_aic or best_aic == 0:
+        VAR = Var(df, lag)
+        r,  f, aic = VAR.varCalculation(j, notwanted)
+        if aic < best_aic or best_aic == 0:
             best_aic = aic
             best_f = f
             best_r = r
-       print("best_parameters", lag, best_aic, best_r)
+        aic_values.append(best_aic)
+        print("best_parameters", j, best_aic, "the R^2 value is:", best_r)
+    for i in range(len(aic_values)):
+        if i < aic_values[0]:
+            print("there is granger causality between", k)
+        else:
+            print("there is no granger causality between", k)
+
