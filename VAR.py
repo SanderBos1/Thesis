@@ -8,10 +8,9 @@ import matplotlib.pyplot as plt
 
 class Var:
 
-    def __init__(self, data, optimal_lag_a, optimal_lag_b):
+    def __init__(self, data, lag):
         self.data = data
-        self.optimal_lag_a = optimal_lag_a
-        self.optimal_lag_b = optimal_lag_b
+        self.lag = lag
 
     """ Estimation of VAR models
     Input:
@@ -22,35 +21,23 @@ class Var:
     e: the error term
     """
 
-    def varCalculation(self, variables, index):
-        #data preparation
-
-        # set columname as index
-        self.data = self.data.set_index(index)
-        features = self.data.columns
-
+    def varCalculation(self, variables, notwanted):
         # drop columns that are not needed
-        for i in features:
-            if i not in variables:
-                self.data = self.data.drop([i], axis=1)
 
-        # loop through each of the features
-        for j in variables:
-            # loop through each lag
-            if j == variables[0]:
-                optimal_lag = self.optimal_lag_a
-            else:
-                optimal_lag = self.optimal_lag_b
-            for i in range(1, optimal_lag+1):
-                # add lag i of feature j to the dataframe
-                self.data[f"{j}_Lag_{i}"] = self.data[j].shift(i)
-        self.data = self.data.dropna()
+        features = self.data.columns
+        if len(variables) == 1:
+            self.data = self.data.filter(like=variables[0])
+        else:
+            for i in notwanted:
+                self.data = self.data.drop([i], axis=1)
+            for j in notwanted:
+                for i in range(1, self.lag + 1):
+                    self.data = self.data.drop([f"{j}_Lag_{i}"], axis=1)
 
         # extract the first variables.
         y_True = self.data[variables[0]]
+        self.data = self.data.drop(variables[0], axis=1)
 
-        for i in range(len(variables)):
-            self.data = self.data.drop([variables[i]], axis=1)
 
         # insert intercept column with all value of 1
         self.data.insert(0, "Intercept", 1)
@@ -67,7 +54,7 @@ class Var:
         for i in self.data:
             y = dotProduct(i, b)
             y_values.append(y)
-        amount_var = self.optimal_lag_a + self.optimal_lag_b
+        amount_var = len(features) * self.lag
         diagntd = Diagnostics(y_values, y_True, amount_var)
         r, f, aic = diagntd.results()
         return r, f, aic
