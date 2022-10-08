@@ -1,10 +1,6 @@
-import numpy as np
 from Performance import Diagnostics
-from sklearn.model_selection import train_test_split
 from formulas import normalEquations, dotProduct
-import matplotlib
-matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
+
 
 class Var:
 
@@ -23,7 +19,6 @@ class Var:
 
     def varCalculation(self, variables, notwanted):
         # drop columns that are not needed
-
         features = self.data.columns
         if len(variables) == 1:
             self.data = self.data.filter(like=variables[0])
@@ -33,10 +28,13 @@ class Var:
             for j in notwanted:
                 for i in range(1, self.lag + 1):
                     self.data = self.data.drop([f"{j}_Lag_{i}"], axis=1)
-
         # extract the first variables.
-        y_True = self.data[variables[0]]
-        self.data = self.data.drop(variables[0], axis=1)
+        if isinstance(variables, str):
+            variables = variables
+        else:
+            variables = variables[0]
+        y_True = self.data[variables]
+        self.data = self.data.drop(variables, axis=1)
 
 
         # insert intercept column with all value of 1
@@ -59,10 +57,9 @@ class Var:
         r, f, aic = diagntd.results()
         return r, f, aic
 
-    #makes a plot of the data
-    def varPlot(self, index, ind_var):
-        self.data.plot(x=index, y=ind_var, kind='line')
-        plt.show()
+
+
+
 
 
 

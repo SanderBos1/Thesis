@@ -1,18 +1,25 @@
+import numpy as np
 import pandas as pd
+
+import pyspark.conf
 from VAR import Var
+from pyspark.sql import SparkSession
 
 # defines how much lags you watch back
+from pyspark.sql.types import IntegerType, StringType
+
 windowlength = 50
 lag = int(windowlength/10)
 
 # conversion of csv file to desired data
-df = pd.read_csv("Data/PRICE_AND_DEMAND_202209_NSW1.csv")
 
-# data preparation
+df = pd.read_pickle("Data/stocks_prepared.pkl")
 
-# set columname as index
-df = df.set_index("SETTLEMENTDATE")
+features_size = 15
 features = df.columns.tolist()
+print(len(features))
+features = features[0:features_size]
+print("features", features)
 
 for j in features:
     # loop through each of the features
@@ -21,25 +28,58 @@ for j in features:
             df[f"{j}_Lag_{i}"] = df[j].shift(i)
 df = df.dropna()
 
-dep_var = [[["TOTALDEMAND"], ["TOTALDEMAND", "RRP"]], [["RRP"],["RRP", "TOTALDEMAND"]]]
-# desired variables
+print(df)
 
+# function that calculates if there is Granger causality
+def Granger_causality(dep_var, features, df):
 
-# var calculation desired_var
-for k in dep_var:
-    best_f = 0
-    best_aic = 0
-    best_r = 0
-    first_value = [k[0]]
-    for j in k:
-       notwanted = []
-       for i in features:
-            if i not in j:
-                notwanted.append(i)
-       VAR = Var(df, lag)
-       r,  f, aic = VAR.varCalculation(j, notwanted)
-       if aic < best_aic or best_aic == 0:
-            best_aic = aic
-            best_f = f
-            best_r = r
-       print("best_parameters", lag, best_aic, best_r)
+    first = dep_var[0]
+    both = dep_var
+    notneeded = []
+    aic_scores = []
+
+    for feature in features:
+        if feature not in both:
+            notneeded.append(feature)
+
+    VAR = Var(df, lag)
+    r, f, aic = VAR.varCalculation(both, notneeded)
+    aic_scores.append(aic)
+    both.remove(first)
+    for i in both:
+        notneeded.append(i)
+    VAR = Var(df, lag)
+    r, f, aic = VAR.varCalculation(first, notneeded)
+    aic_scores.append(aic)
+    print(aic_scores)
+    for score in aic_scores:
+        if score < aic_scores[-1]:
+            print(dep_var)
+            return dep_var
+
+    return [-1]
+
+a = [["A", "AAL"], ["AAL", "A"]]
+dep_var = []
+for i in range(len(features)-2):
+        dep_var.append([features[i], features[i+1]])
+        dep_var.append([features[i+1], features[i]])
+print(dep_var)
+
+answers = []
+for i in a:
+    print("this is i", i)
+    b = Granger_causality(i, features, df)
+    answers.append(b)
+print("this is answers", answers)
+
+answers_spark = []
+spark = SparkSession.builder.master("local[1]") \
+    .appName("SparkByExamples.com").getOrCreate()
+rdd=spark.sparkContext.parallelize(dep_var)
+rdd2 = rdd.flatMap(lambda x: Granger_causality(x, features, df))
+for element in rdd2.collect():
+    if element != -1:
+        print(element)
+        answers_spark.append(element)
+print(answers_spark)
