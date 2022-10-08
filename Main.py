@@ -32,16 +32,14 @@ print(df)
 
 # function that calculates if there is Granger causality
 def Granger_causality(dep_var, features, df):
-
     first = dep_var[0]
-    both = dep_var
+    both = dep_var.copy()
     notneeded = []
     aic_scores = []
 
     for feature in features:
         if feature not in both:
             notneeded.append(feature)
-
     VAR = Var(df, lag)
     r, f, aic = VAR.varCalculation(both, notneeded)
     aic_scores.append(aic)
@@ -51,35 +49,24 @@ def Granger_causality(dep_var, features, df):
     VAR = Var(df, lag)
     r, f, aic = VAR.varCalculation(first, notneeded)
     aic_scores.append(aic)
-    print(aic_scores)
     for score in aic_scores:
         if score < aic_scores[-1]:
-            print(dep_var)
             return dep_var
-
     return [-1]
 
-a = [["A", "AAL"], ["AAL", "A"]]
 dep_var = []
 for i in range(len(features)-2):
         dep_var.append([features[i], features[i+1]])
         dep_var.append([features[i+1], features[i]])
 print(dep_var)
 
-answers = []
-for i in a:
-    print("this is i", i)
-    b = Granger_causality(i, features, df)
-    answers.append(b)
-print("this is answers", answers)
 
 answers_spark = []
 spark = SparkSession.builder.master("local[1]") \
     .appName("SparkByExamples.com").getOrCreate()
 rdd=spark.sparkContext.parallelize(dep_var)
-rdd2 = rdd.flatMap(lambda x: Granger_causality(x, features, df))
+rdd2 = rdd.map(lambda x: Granger_causality(x, features, df))
 for element in rdd2.collect():
-    if element != -1:
-        print(element)
+    if element[0] != -1:
         answers_spark.append(element)
 print(answers_spark)
