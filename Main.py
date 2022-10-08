@@ -58,6 +58,7 @@ dep_var = []
 for i in range(len(features)-2):
         dep_var.append([features[i], features[i+1]])
         dep_var.append([features[i+1], features[i]])
+        dep_var.append([features[i + 1],features[i+2],  features[i]])
 print(dep_var)
 
 
