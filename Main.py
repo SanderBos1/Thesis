@@ -6,14 +6,24 @@ windowlength = 50
 lag = int(windowlength/10)
 
 # conversion of csv file to desired data
-df = pd.read_csv("Data/PRICE_AND_DEMAND_202209_NSW1.csv")
+df = pd.read_csv("Data/sp500_stocks.csv")
 
 # data preparation
 
 # set columname as index
-df = df.set_index("SETTLEMENTDATE")
-features = df.columns.tolist()
+df = df.set_index("Date")
 
+
+keep = ['Symbol', 'High']
+AllColumns = df.columns.tolist()
+for column in AllColumns:
+    if column not in keep:
+        df = df.drop(column, axis=1)
+
+df = df.pivot_table(index="Date", columns='Symbol', values="High")
+
+
+features = df.columns.tolist()
 for j in features:
     # loop through each of the features
     for i in range(1, lag + 1):
@@ -21,7 +31,8 @@ for j in features:
             df[f"{j}_Lag_{i}"] = df[j].shift(i)
 df = df.dropna()
 
-dep_var = [[["TOTALDEMAND"], ["TOTALDEMAND", "RRP"]], [["RRP"],["RRP", "TOTALDEMAND"]]]
+print(df)
+dep_var = [[["A"], ["A", "AAL"]], [["AAL"],["A", "AAL"]]]
 # desired variables
 
 
