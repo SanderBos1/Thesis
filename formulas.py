@@ -3,7 +3,7 @@ import numpy as np
 
 # calculation of normal equations
 
-def normalEquations( X, y):
+def normalEquations(X, y):
     XtX = np.matmul(X.T, X)
     Xty = np.matmul(X.T, y)
     XtX_Inv = np.linalg.inv(XtX)
