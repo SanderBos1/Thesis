@@ -18,6 +18,10 @@ class Var:
     """
 
     def varCalculation(self, variables, notwanted):
+        if isinstance(variables, str):
+            variables = variables
+        else:
+            variables = variables[0]
         # drop columns that are not needed
         features = self.data.columns
         if len(variables) == 1:
@@ -29,10 +33,6 @@ class Var:
                 for i in range(1, self.lag + 1):
                     self.data = self.data.drop([f"{j}_Lag_{i}"], axis=1)
         # extract the first variables.
-        if isinstance(variables, str):
-            variables = variables
-        else:
-            variables = variables[0]
         y_True = self.data[variables]
         self.data = self.data.drop(variables, axis=1)
 

@@ -15,7 +15,7 @@ lag = int(windowlength/10)
 
 df = pd.read_pickle("Data/stocks_prepared.pkl")
 
-features_size = 15
+features_size = 20
 features = df.columns.tolist()
 print(len(features))
 features = features[0:features_size]
@@ -32,33 +32,35 @@ print(df)
 
 # function that calculates if there is Granger causality
 def Granger_causality(dep_var, features, df):
-    first = dep_var[0]
-    both = dep_var.copy()
     notneeded = []
-    aic_scores = []
+    best_aic = []
+    current = []
+    granger = False
+    answer = -1
 
     for feature in features:
-        if feature not in both:
             notneeded.append(feature)
-    VAR = Var(df, lag)
-    r, f, aic = VAR.varCalculation(both, notneeded)
-    aic_scores.append(aic)
-    both.remove(first)
-    for i in both:
-        notneeded.append(i)
-    VAR = Var(df, lag)
-    r, f, aic = VAR.varCalculation(first, notneeded)
-    aic_scores.append(aic)
-    for score in aic_scores:
-        if score < aic_scores[-1]:
-            return dep_var
-    return [-1]
+    for i in range(len(dep_var)):
+        VAR = Var(df, lag)
+        notneeded.remove(dep_var[i])
+        current.append(dep_var[i])
+        r, f, aic = VAR.varCalculation(current, notneeded)
+        best_aic.append(aic)
+        if aic < best_aic[0]:
+            best_aic[0] = aic
+            answer = current.copy()
+            granger = True
+    if granger:
+        return answer
+    else:
+        return [-1]
 
 dep_var = []
 for i in range(len(features)-2):
-        dep_var.append([features[i], features[i+1]])
-        dep_var.append([features[i+1], features[i]])
-        dep_var.append([features[i + 1],features[i+2],  features[i]])
+        dep_var.append([features[i], features[i + 1],features[i+2]])
+        dep_var.append([features[i+1], features[i], features[i + 2]])
+        dep_var.append([features[i + 2], features[i+1], features[i]])
+        dep_var.append([features[i + 2], features[i], features[i+1]])
 print(dep_var)
 
 
