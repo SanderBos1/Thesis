@@ -52,10 +52,10 @@ class Var:
         for i in self.data:
             y = dotProduct(i, b)
             y_values.append(y)
-        amount_var = len(features) * self.lag
-        diagntd = Diagnostics(y_values, y_True, amount_var)
-        r, f, aic = diagntd.results()
-        return r, f, aic
+
+        diagntd = Diagnostics(y_values, y_True)
+        variance = diagntd.results()
+        return variance
 
 
 

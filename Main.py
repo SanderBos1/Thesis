@@ -14,9 +14,9 @@ lag = int(windowlength/10)
 # conversion of csv file to desired data
 
 df = pd.read_pickle("Data/stocks_prepared.pkl")
-
-features_size = 20
+features_size = 5
 features = df.columns.tolist()
+
 print(len(features))
 features = features[0:features_size]
 print("features", features)
@@ -33,34 +33,34 @@ print(df)
 # function that calculates if there is Granger causality
 def Granger_causality(dep_var, features, df):
     notneeded = []
-    best_aic = []
-    current = []
-    granger = False
-    answer = -1
+    variances = []
+    scores = []
 
     for feature in features:
             notneeded.append(feature)
     for i in range(len(dep_var)):
+        current = dep_var[:i+1]
         VAR = Var(df, lag)
         notneeded.remove(dep_var[i])
-        current.append(dep_var[i])
-        r, f, aic = VAR.varCalculation(current, notneeded)
-        best_aic.append(aic)
-        if aic < best_aic[0]:
-            best_aic[0] = aic
-            answer = current.copy()
-            granger = True
-    if granger:
-        return answer
-    else:
-        return [-1]
+        variance = VAR.varCalculation(current, notneeded)
+        variances.append(variance)
+        if len(variances) > 1:
+            print(len(variances))
+            print("this is i", i)
+            score = np.log(variances[0]/variances[i])
+            print("this is the score", score)
+            print("this is current", current)
+            scores.append([current, score])
+            print("this is scores", scores)
+    print("this is scores zero", scores[0])
+    return scores
+
 
 dep_var = []
 for i in range(len(features)-2):
         dep_var.append([features[i], features[i + 1],features[i+2]])
         dep_var.append([features[i+1], features[i], features[i + 2]])
-        dep_var.append([features[i + 2], features[i+1], features[i]])
-        dep_var.append([features[i + 2], features[i], features[i+1]])
+
 print(dep_var)
 
 
