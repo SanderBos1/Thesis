@@ -1,6 +1,5 @@
-import numpy as np
+import statistics
 
-from statsmodels.tools.eval_measures import aic
 
 class Diagnostics:
 
@@ -8,11 +7,10 @@ class Diagnostics:
         self.y_predict = y_predict
         self.y_true = y_true
 
-
     def logVariance(self):
 
-        mean_error = np.mean((self.y_true - self.y_predict)**2)
-        var = np.mean(((self.y_true - self.y_predict) - mean_error)**2)
+        residual = self.y_true - self.y_predict
+        var = statistics.variance(residual)
 
         return var
 

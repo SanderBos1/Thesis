@@ -17,9 +17,7 @@ df = pd.read_pickle("Data/stocks_prepared.pkl")
 features_size = 5
 features = df.columns.tolist()
 
-print(len(features))
 features = features[0:features_size]
-print("features", features)
 
 for j in features:
     # loop through each of the features
@@ -28,7 +26,6 @@ for j in features:
             df[f"{j}_Lag_{i}"] = df[j].shift(i)
 df = df.dropna()
 
-print(df)
 
 # function that calculates if there is Granger causality
 def Granger_causality(dep_var, features, df):
@@ -45,24 +42,20 @@ def Granger_causality(dep_var, features, df):
         variance = VAR.varCalculation(current, notneeded)
         variances.append(variance)
         if len(variances) > 1:
-            print(len(variances))
-            print("this is i", i)
             score = np.log(variances[0]/variances[i])
-            print("this is the score", score)
-            print("this is current", current)
             scores.append([current, score])
-            print("this is scores", scores)
-    print("this is scores zero", scores[0])
     return scores
 
+def topk(x):
+    for i in range(0, len(x)-1):
+        if x[i][1] < x[i+1][1]:
+            return x
+    return [-1]
 
 dep_var = []
 for i in range(len(features)-2):
         dep_var.append([features[i], features[i + 1],features[i+2]])
         dep_var.append([features[i+1], features[i], features[i + 2]])
-
-print(dep_var)
-
 
 answers_spark = []
 spark = SparkSession.builder.master("local[1]") \
@@ -70,6 +63,8 @@ spark = SparkSession.builder.master("local[1]") \
 rdd=spark.sparkContext.parallelize(dep_var)
 rdd2 = rdd.map(lambda x: Granger_causality(x, features, df))
 for element in rdd2.collect():
-    if element[0] != -1:
-        answers_spark.append(element)
+    answers_spark.append(element)
 print(answers_spark)
+rdd3 = rdd2.map(lambda x: topk(x))
+for element in rdd3.collect():
+    print(element)
