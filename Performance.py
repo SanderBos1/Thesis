@@ -11,7 +11,6 @@ class Diagnostics:
 
         residual = self.y_true - self.y_predict
         var = statistics.variance(residual)
-
         return var
 
     def results(self):
