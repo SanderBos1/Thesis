@@ -1,5 +1,9 @@
 import statistics
-import statsmodels.api as sm
+
+import numpy as np
+from sklearn import linear_model
+from statsmodels.tsa.ar_model import ar_select_order
+from statsmodels.tsa.api import VAR
 
 class Var:
 
@@ -16,25 +20,26 @@ class Var:
     e: the error term
     """
 
+
     def varCalculation(self, variables):
 
-        for j in variables:
-            # loop through each of the features
-            for i in range(1, self.lag + 1):
-                # add lag i of feature j to the dataframe
-                self.data[f"{j}_Lag_{i}"] = self.data[j].shift(i)
-        self.data = self.data.dropna()
-
-        # extract the first variables.
-        y_True = self.data[variables[0]]
-
-        self.data = self.data.drop(variables, axis=1)
-
-        model = sm.OLS(y_True, self.data)
-        results = model.fit()
-        resid = results.resid
-        var = statistics.variance(resid)
-        print("these are the resid", var)
+        if len(variables) == 1:
+            ar_model = ar_select_order(self.data, self.lag)
+            model = ar_model.model.fit()
+            resid = model.resid
+            var = np.var(resid)
+        else:
+            print("do we get here")
+            y_True = self.data[variables[0]]
+            model = VAR(self.data, y_True)
+            model.select_order(self.lag)
+            results = model.fit()
+            print(results.summary())
+            resid = results.resid
+            print("these are the residuals", resid)
+            print("check", resid[variables[0]])
+            var = np.var(resid[variables[0]])
+            print("this is the var", var)
         return var
 
 

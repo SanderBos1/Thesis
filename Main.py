@@ -18,7 +18,7 @@ features = df.columns.tolist()
 
 features = list(features[0:features_size])
 df = df[features]
-
+df = df.dropna()
 # function that calculates if there is Granger causality
 def Granger_causality(dep_var):
     variances = []
@@ -28,9 +28,11 @@ def Granger_causality(dep_var):
         current = list(dep_var[:i+1])
         data = df[current].copy(deep=True)
         VAR = Var(data, lag)
-        variance = VAR.varCalculation(current)
+        variance = VAR.varCalculation_2(current)
         variances.append(variance)
         if len(variances) > 1:
+            print("this is variances", variances)
+            print('these are i var', variances[i])
             score = np.log(variances[0]/variances[i])
             scores.append([current, score])
     return scores
