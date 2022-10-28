@@ -7,10 +7,11 @@ class datamanipulator:
     def __init__(self):
         self.data = pd.read_csv("Data/sp500_stocks.csv")
 
-    def prepare(self):
+    def prepare(self, features_size, start_date, end_date):
         # data preparation
         df = self.data.set_index('Date')
         df.index = pd.to_datetime(df.index)
+        df = df.loc[start_date:end_date]
         df.index = df.index.to_period("D")
         keep = ['Symbol', 'High']
         AllColumns = df.columns.tolist()
@@ -19,7 +20,11 @@ class datamanipulator:
                 df = df.drop(column, axis=1)
 
         df = df.pivot_table(index="Date", columns='Symbol', values="High")
-        df.to_pickle("Data/stocks_prepared.pkl")
+        features = df.columns.tolist()
+        features = list(features[0:features_size])
+        df = df[features]
+
+        return df
 
     def detrend(self, df):
         for column in df:
