@@ -22,7 +22,7 @@ class topk:
             VAR = Var(data, self.lag)
             variance = VAR.varCalculation(current)
             variances.append(variance)
-
+            #print(variances)
             # calculates the GC and puts it in a list with the model that is considered.
             if len(variances) > 1:
                 score = np.log(variances[0]/variances[i])
@@ -39,11 +39,10 @@ class topk:
     def finding_topk_granger(self):
         # Makes a list of all combinations of stocks and creates a list
         granger_variables = list(combinations(self.features, 3))
-        for i in granger_variables:
-            print(i)
+
         # creates a sparksession to be used
-        spark = SparkSession.builder.master("local[1]") \
-            .appName("SparkByExamples.com").getOrCreate()
+        spark = SparkSession.builder.master("local[4]") \
+        .getOrCreate()
         rdd = spark.sparkContext.parallelize(granger_variables)
 
         # calculates the GC of bivariate and Multivariate combinations
