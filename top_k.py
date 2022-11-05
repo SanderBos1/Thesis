@@ -10,24 +10,30 @@ class topk:
         self.lag = lag
         self.features = features
 
-    # function that calculates the variane of the residuals of the bi & multivariate model
+    # function that calculates the variance of the residuals of the bi & multivariate model
     def Granger_causality(self, dep_var):
         variances = []
         scores = []
 
         #loops through all the columns in dep_var and changes current accordingly
         for i in range(len(dep_var)):
-            current = list(dep_var[:i+1])
+            current = list(dep_var[:i + 1])
             data = self.df[current].copy(deep=True)
             VAR = Var(data, self.lag)
             variance = VAR.varCalculation(current)
             variances.append(variance)
-            #print(variances)
             # calculates the GC and puts it in a list with the model that is considered.
             if len(variances) > 1:
                 score = np.log(variances[0]/variances[i])
                 scores.append([current, score])
-
+        # checks if  the bivariate model of the first and last value are better.
+        current_rev = [dep_var[0], dep_var[2]]
+        data = self.df[current_rev].copy(deep=True)
+        VAR = Var(data, self.lag)
+        variance = VAR.varCalculation(current_rev)
+        score = np.log(variances[0]/variance)
+        if score > scores[0][1]:
+            scores[0] = [current_rev, score]
         return scores
 
     # Calculates the difference between the bivariate and multivariate model

@@ -1,8 +1,6 @@
 import numpy as np
 from statsmodels.tsa.ar_model import AutoReg
 from statsmodels.tsa.api import VAR
-from statsmodels.tsa.stattools import adfuller, kpss, grangercausalitytests
-import pandas as pd
 
 class Var:
 
@@ -20,8 +18,6 @@ class Var:
         else:
             model = VAR(self.data)
             results = model.fit(self.lag)
-           #print("the lag", self.lag)
-           #print(results.test_causality(variables[0], variables[1], kind="f"))
             resid = results.resid
             var = np.var(resid[variables[0]])
 

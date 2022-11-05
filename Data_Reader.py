@@ -24,7 +24,7 @@ class datamanipulator:
                     df = df.drop(column, axis=1)
             df = df.pivot_table(index="Date", columns='Symbol', values="High")
         features = df.columns.tolist()
-        features = list(features[0:features_size])
+        features = list(features[0:features_size]) #["AAL", "APTV",  "FOXA"]
         df = df[features]
 
         return df
