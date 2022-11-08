@@ -1,14 +1,17 @@
 from top_k import topk
 from Data_Reader import datamanipulator
 import numpy as np
+import matplotlib.pyplot as plt
 
-def data_analyser(data_string, start_date, end_date, pre, index,  sort_string ,lags):
+def data_analyser(data_string, start_date, end_date, pre, index,  sort_string):
 
     datamanipulator_function = datamanipulator(data_string)
     df = datamanipulator_function.prepare(features_size, pre, sort_string, index, start_date, end_date)
     df = datamanipulator_function.detrend(df)
-    df = df.dropna()
-    print(df)
+    df = df.iloc[1:, :]
+    return df
+
+def top_k(df, lags):
     for i in lags:
         # calculation of the top 10, save in top_k.csv
         features = df.columns.tolist()
@@ -18,6 +21,11 @@ def data_analyser(data_string, start_date, end_date, pre, index,  sort_string ,l
                    top_10,
                    delimiter=", ",
                    fmt='% s')
+
+def plot(features, df):
+    df.plot(x=None, y=features, kind="line", subplots=True)
+    plt.show()
+
 #data preparation and parameter settings
 lags = [1, 5, 10]
 features_size = 200
@@ -27,7 +35,14 @@ end_date = '2021-07-01'
 sort_string = "D"
 index = "Date"
 data_place = "Data/sp500_stocks.csv"
-data_analyser(data_place, start_date, end_date, pre, index, sort_string, lags)
+df = data_analyser(data_place, start_date, end_date, pre, index, sort_string)
+#features = ["AAL", "CLX", "FIS"]
+#plot(features, df)
+
+top_k(df, lags)
+
+
+
 
 
 lags_2 = [30]

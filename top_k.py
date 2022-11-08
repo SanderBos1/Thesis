@@ -47,7 +47,7 @@ class topk:
         granger_variables = list(combinations(self.features, 3))
 
         # creates a sparksession to be used
-        spark = SparkSession.builder.master("local[4]") \
+        spark = SparkSession.builder.master("local[5]") \
         .getOrCreate()
         rdd = spark.sparkContext.parallelize(granger_variables)
 

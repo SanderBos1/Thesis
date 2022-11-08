@@ -15,7 +15,6 @@ class datamanipulator:
         df.index = pd.to_datetime(df.index)
         df = df.loc[start_date:end_date]
         df.index = df.index.to_period(period)
-
         if pre == True:
             keep = ['Symbol', 'High']
             AllColumns = df.columns.tolist()
@@ -24,9 +23,8 @@ class datamanipulator:
                     df = df.drop(column, axis=1)
             df = df.pivot_table(index="Date", columns='Symbol', values="High")
         features = df.columns.tolist()
-        features = list(features[0:features_size]) #["AAL", "APTV",  "FOXA"]
+        features = list(features[0:features_size]) # ["A", "DE", "FMC"]
         df = df[features]
-
         return df
 
     def prepare_allcolumns(self, features_size, index, start_date, end_date, drop):
