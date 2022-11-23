@@ -15,30 +15,48 @@ class TopK:
         variances = []
         scores = []
 
-        # loops through all the variables in dep_var and changes current accordingly
-        for i in range(len(dep_var)):
-            current = list(dep_var[:i + 1])
-            data = self.df[current].copy(deep=True)
-            VAR = Var(data, self.lag)
-            variance = VAR.var_calculation(current)
-            variances.append(variance)
-            # calculates the GC and puts it in a list
-            if len(variances) > 1:
-                score = np.log(variances[0]/variances[i])
-                scores.append([current, score])
-        # checks if  the bivariate model of the first and last value are better and chooses accordingly
-        current_rev = [dep_var[0], dep_var[2]]
-        data = self.df[current_rev].copy(deep=True)
+        # calculates the variance of the univariate model
+
+        data = self.df[dep_var[0]].copy(deep=True)
         VAR = Var(data, self.lag)
-        variance = VAR.var_calculation(current_rev)
-        score = np.log(variances[0]/variance)
-        if score > scores[0][1]:
-            scores[0] = [current_rev, score]
+        univariate = [dep_var[0]]
+        variance = VAR.var_calculation(univariate)
+        variances.append(variance)
+
+        # calculates the score of all possible bivariate model and takes the highest
+
+        for i in range(1, len(dep_var)):
+            bivariate = []
+            bivariate.append(dep_var[0])
+            bivariate.append(dep_var[i])
+            data = self.df[bivariate].copy(deep=True)
+            VAR = Var(data, self.lag)
+            variance = VAR.var_calculation(bivariate)
+            # calculates the GC and puts it in a list
+            score = np.log(variances[0] / variance)
+            if len(scores) == 0:
+                scores.append([bivariate, score])
+            elif scores[0][1] < score:
+                scores.pop(0)
+                scores.append([bivariate, score])
+
+        # calculates the GC value of the multivariate models
+        if len(dep_var) > 2:
+            for i in range(3, len(dep_var)+1):
+                current = list(dep_var[:i])
+                data = self.df[current].copy(deep=True)
+                VAR = Var(data, self.lag)
+                variance = VAR.var_calculation(current)
+                score = np.log(variances[0] / variance)
+                scores.append([current, score])
         return scores
 
     # Calculates the difference between the bivariate and multivariate model
+
     def difference_calc(self, x):
-        difference = x[1][1] - x[0][1]
+        first = x[0]
+        second = x[-1]
+        difference = second[1] - first[1]
         y = [x, difference]
         return y
 

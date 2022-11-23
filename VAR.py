@@ -10,8 +10,11 @@ class Var:
         self.lag = lag
 
     def var_calculation(self, variables):
+        print(variables)
+        print(len(variables))
         # takes an autoregression model if only one time-series is considered
         if len(variables) == 1:
+            print("do i get here")
             model = AutoReg(self.data, self.lag)
             model = model.fit()
             resid = model.resid
