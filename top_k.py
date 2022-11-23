@@ -3,7 +3,7 @@ from itertools import combinations
 from VAR import Var
 from pyspark.sql import SparkSession
 
-class topk:
+class TopK:
 
     def __init__(self, df, lag, features):
         self.df = df
@@ -15,22 +15,22 @@ class topk:
         variances = []
         scores = []
 
-        #loops through all the columns in dep_var and changes current accordingly
+        # loops through all the variables in dep_var and changes current accordingly
         for i in range(len(dep_var)):
             current = list(dep_var[:i + 1])
             data = self.df[current].copy(deep=True)
             VAR = Var(data, self.lag)
-            variance = VAR.varCalculation(current)
+            variance = VAR.var_calculation(current)
             variances.append(variance)
-            # calculates the GC and puts it in a list with the model that is considered.
+            # calculates the GC and puts it in a list
             if len(variances) > 1:
                 score = np.log(variances[0]/variances[i])
                 scores.append([current, score])
-        # checks if  the bivariate model of the first and last value are better.
+        # checks if  the bivariate model of the first and last value are better and chooses accordingly
         current_rev = [dep_var[0], dep_var[2]]
         data = self.df[current_rev].copy(deep=True)
         VAR = Var(data, self.lag)
-        variance = VAR.varCalculation(current_rev)
+        variance = VAR.var_calculation(current_rev)
         score = np.log(variances[0]/variance)
         if score > scores[0][1]:
             scores[0] = [current_rev, score]
@@ -42,9 +42,9 @@ class topk:
         y = [x, difference]
         return y
 
-    def finding_topk_granger(self):
+    def finding_topk_granger(self, nr_comb):
         # Makes a list of all combinations of stocks and creates a list
-        granger_variables = list(combinations(self.features, 3))
+        granger_variables = list(combinations(self.features, nr_comb))
 
         # creates a sparksession to be used
         spark = SparkSession.builder.master("local[5]") \
@@ -58,5 +58,5 @@ class topk:
         rdd3 = rdd2.map(lambda x: self.difference_calc(x))
 
         # takes the top 10 with the largest difference
-        rdd4 = rdd3.top(10, key=lambda x: x[1])
+        rdd4 = rdd3.top(30, key=lambda x: x[1])
         return rdd4

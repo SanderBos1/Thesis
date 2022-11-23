@@ -1,58 +1,59 @@
-from top_k import topk
-from Data_Reader import datamanipulator
+from top_k import TopK
+from Data_Reader import DataManipulator
 import numpy as np
 import matplotlib.pyplot as plt
 
-def data_analyser(data_string, start_date, end_date, pre, index,  sort_string):
 
-    datamanipulator_function = datamanipulator(data_string)
-    df = datamanipulator_function.prepare(features_size, pre, sort_string, index, start_date, end_date)
+# prepares the data to a workable time-series, applies detrending
+def data_analyser(data_string, index,  sort_string):
+
+    datamanipulator_function = DataManipulator(data_string)
+    df = datamanipulator_function.prepare(sort_string, index)
+    df = datamanipulator_function.prep_sp500(df)
+    # the next line can be uncommented to create a csv of the prepared dataset
+    # df.to_csv('Data/sp500_nodetrending.csv')
     df = datamanipulator_function.detrend(df)
     df = df.iloc[1:, :]
     return df
 
+
+# calculates the top k differences of the GC value of bivariate and multivariate GC
 def top_k(df, lags):
     for i in lags:
-        # calculation of the top 10, save in top_k.csv
         features = df.columns.tolist()
-        topk_stocks = topk(df, i, features)
-        top_10 = topk_stocks.finding_topk_granger()
+        topk_stocks = TopK(df, i, features)
+        # parameters define how many variables you put in the casual relationships
+        top_k= topk_stocks.finding_topk_granger(3)
         np.savetxt("top_k" + str(i) + ".csv",
-                   top_10,
+                   top_k,
                    delimiter=", ",
                    fmt='% s')
 
+
+# use this method to plot desired features
 def plot(features, df):
     df.plot(x=None, y=features, kind="line", subplots=True)
+    plt.savefig("Data/plot.png")
     plt.show()
 
-#data preparation and parameter settings
-lags = [1, 5, 10]
-features_size = 200
-pre = True
-start_date = '2021-01-01'
-end_date = '2021-07-01'
-sort_string = "D"
-index = "Date"
-data_place = "Data/sp500_stocks.csv"
-df = data_analyser(data_place, start_date, end_date, pre, index, sort_string)
-#features = ["AAL", "CLX", "FIS"]
-#plot(features, df)
 
-top_k(df, lags)
+# applies the top_k method on the desired parameters
+def top_30_sp500():
+    # desired parameters
+    lags = [30]
+    start_date = '2016-01-01'
+    end_date = '2016-07-01'
+    sort_string = "D"
+    index = "Date"
+    data_place = "Data/sp500_stocks.csv"
+    # applies the desired date to the prepared dataset
+    df = data_analyser(data_place, index, sort_string)
+    df = df.loc[start_date:end_date]
+    # the following lines can be uncommented to prune the dataframe. THis is done for testing purposes
+    features_size = 5
+    features = df.columns.tolist()
+    features = list(features[0:features_size])
+    df = df[features]
+    return top_k(df, lags)
 
-
-
-
-
-lags_2 = [30]
-features_size_2 = 5
-start_date_2 = '2009-01-01'
-end_date_2 = '2010-01-01'
-pre_2 = False
-date_place_2 = "Data/train_series_datetime.csv"
-sort_string_2 = "H"
-index_2 = "Date Time"
-#data_analyser(date_place_2, start_date_2, end_date_2, pre_2, index_2, sort_string_2, lags_2)
-
-
+top_30_sp500()
