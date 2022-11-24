@@ -3,6 +3,7 @@ from itertools import combinations
 from VAR import Var
 from pyspark.sql import SparkSession
 
+
 class TopK:
 
     def __init__(self, df, lag, features):
@@ -23,7 +24,7 @@ class TopK:
         variance = VAR.var_calculation(univariate)
         variances.append(variance)
 
-        # calculates the score of all possible bivariate model and takes the highest
+        # calculates the GC of all possible bivariate model and takes the highest
 
         for i in range(1, len(dep_var)):
             bivariate = []
@@ -52,7 +53,6 @@ class TopK:
         return scores
 
     # Calculates the difference between the bivariate and multivariate model
-
     def difference_calc(self, x):
         first = x[0]
         second = x[-1]
@@ -64,7 +64,7 @@ class TopK:
         # Makes a list of all combinations of stocks and creates a list
         granger_variables = list(combinations(self.features, nr_comb))
 
-        # creates a sparksession to be used
+        # creates a sparksession to be used, defines how many cores the program uses
         spark = SparkSession.builder.master("local[5]") \
         .getOrCreate()
         rdd = spark.sparkContext.parallelize(granger_variables)

@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import pandas as pd
 
 
@@ -8,7 +6,7 @@ class DataManipulator:
     def __init__(self, csv):
         self.data = pd.read_csv(csv)
 
-    # converts the data to a python dataset
+    # converts the data to a python temporal dataset
     def prepare(self, period, index):
         # data preparation
         df = self.data.set_index(index)
@@ -21,10 +19,11 @@ class DataManipulator:
     def detrend(self, df):
         for column in df:
             df[column] = df[column].diff(periods=1)
-            #df.to_csv('Data/sp500_detrended.csv')
+            # the following line can be uncommented to store the result in a csv file
+            # df.to_csv('Data/sp500_detrended.csv')
         return df
 
-    # the used dataset is not in desired form, so this method makes sure that each column is its own stock
+    # the sp500 dataset is not in desired form, so this method makes sure that each column belongs to a unique stock
     def prep_sp500(self, df):
         keep = ['Symbol', 'High']
         AllColumns = df.columns.tolist()
