@@ -56,11 +56,12 @@ def top_30_sp500():
     df = data_analyser(data_place, index, sort_string)
     # prunes the dataset on the desired time period
     df = df.loc[start_date:end_date]
+    df = df.dropna(axis=1)
     # the following lines can be uncommented to prune the dataframe. This is done for testing purposes
-    # features_size = 5
-    # features = df.columns.tolist()
-    # features = list(features[0:features_size])
-    # df = df[features]
+    #features_size = 502
+    #features = df.columns.tolist()
+    #features = list(features[0:features_size])
+    #df = df[features]
     return top_k(df, window_sizes)
 
 # executes the program
