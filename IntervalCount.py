@@ -3,7 +3,8 @@ from itertools import combinations
 from VAR import Var
 from pyspark.sql import SparkSession
 
-class WindowSize:
+
+class CountInterval:
 
     def __init__(self, df, lag, features):
         self.df = df
@@ -24,9 +25,9 @@ class WindowSize:
         VAR = Var(data, self.lag)
         variance = VAR.var_calculation(current)
         score = np.log(variances[0] / variance)
-        return [current, score]
+        return score
 
-    def finding_All_granger(self, nr_comb):
+    def Count_Intervals(self, nr_comb):
         # Makes a list of all combinations of stocks and creates a list
         granger_variables = list(combinations(self.features, nr_comb))
 
@@ -38,7 +39,7 @@ class WindowSize:
         # calculates the GC of all combinations
         rdd2 = rdd.map(lambda x: self.GC_calculator(x))
 
-        rdd3 = rdd2.sortBy(lambda x: x[1]).collect()
+        rdd3 = rdd2.histogram(10)
 
         return rdd3
 
