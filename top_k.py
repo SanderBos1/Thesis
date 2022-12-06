@@ -63,7 +63,6 @@ class TopK:
     def finding_topk_granger(self, nr_comb):
         # Makes a list of all combinations of stocks and creates a list
         granger_variables = list(combinations(self.features, nr_comb))
-
         # creates a sparksession to be used, defines how many cores the program uses
         spark = SparkSession.builder.master("local[5]") \
         .getOrCreate()

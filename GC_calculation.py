@@ -1,9 +1,9 @@
 import numpy as np
-from itertools import combinations
 from VAR import Var
 from pyspark.sql import SparkSession
 
-class WindowSize:
+
+class Grangercalculator:
 
     def __init__(self, df, lag, features):
         self.df = df
@@ -26,9 +26,9 @@ class WindowSize:
         score = np.log(variances[0] / variance)
         return [current, score]
 
-    def finding_All_granger(self, nr_comb):
+    def finding_granger(self, stocks):
         # Makes a list of all combinations of stocks and creates a list
-        granger_variables = list(combinations(self.features, nr_comb))
+        granger_variables = stocks
 
         # creates a sparksession to be used, defines how many cores the program uses
         spark = SparkSession.builder.master("local[5]") \
@@ -37,8 +37,4 @@ class WindowSize:
 
         # calculates the GC of all combinations
         rdd2 = rdd.map(lambda x: self.GC_calculator(x))
-
-        rdd3 = rdd2.sortBy(lambda x: x[1]).collect()
-
-        return rdd3
-
+        return rdd2.collect()
