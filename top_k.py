@@ -12,18 +12,15 @@ class TopK:
         self.features = features
 
     # function that calculates the variance of the residuals of the bi & multivariate model
-    def Granger_causality(self, dep_var):
+    def GC_calculator(self, dep_var):
         variances = []
         scores = []
-
         # calculates the variance of the univariate model
-
         data = self.df[dep_var[0]].copy(deep=True)
         VAR = Var(data, self.lag)
         univariate = [dep_var[0]]
         variance = VAR.var_calculation(univariate)
         variances.append(variance)
-
         # calculates the GC of all possible bivariate model and takes the highest
 
         for i in range(1, len(dep_var)):
@@ -64,12 +61,12 @@ class TopK:
         # Makes a list of all combinations of stocks and creates a list
         granger_variables = list(combinations(self.features, nr_comb))
         # creates a sparksession to be used, defines how many cores the program uses
-        spark = SparkSession.builder.master("local[5]") \
+        spark = SparkSession.builder.master("local[6]") \
         .getOrCreate()
         rdd = spark.sparkContext.parallelize(granger_variables)
 
         # calculates the GC of bivariate and Multivariate combinations
-        rdd2 = rdd.map(lambda x: self.Granger_causality(x))
+        rdd2 = rdd.map(lambda x: self.GC_calculator(x))
 
         # calculates and returns an array of the difference between the combinations
         rdd3 = rdd2.map(lambda x: self.difference_calc(x))

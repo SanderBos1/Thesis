@@ -13,13 +13,14 @@ class CountInterval:
 
     def GC_calculator(self, dep_var):
         variances = []
-
+        scores = []
+        # calculates the variance of the univariate model
         data = self.df[dep_var[0]].copy(deep=True)
         VAR = Var(data, self.lag)
         univariate = [dep_var[0]]
         variance = VAR.var_calculation(univariate)
         variances.append(variance)
-
+        # calculates the GC of the multivariate model (or bivariate)
         current = list(dep_var)
         data = self.df[current].copy(deep=True)
         VAR = Var(data, self.lag)
@@ -32,7 +33,7 @@ class CountInterval:
         granger_variables = list(combinations(self.features, nr_comb))
 
         # creates a sparksession to be used, defines how many cores the program uses
-        spark = SparkSession.builder.master("local[5]") \
+        spark = SparkSession.builder.master("local[6]") \
         .getOrCreate()
         rdd = spark.sparkContext.parallelize(granger_variables)
 
