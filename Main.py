@@ -5,7 +5,7 @@ from src.Data_Reader import DataManipulator
 import matplotlib.pyplot as plt
 from src.window_size import WindowSize
 import math
-
+import numpy as np
 
 class Granger_investigation():
 
@@ -45,10 +45,10 @@ class Granger_investigation():
         df = df.loc[start_date:end_date]
         df = df.dropna(axis=1)
         # the following lines can be uncommented to prune the dataframe. This is done for testing purposes
-        #features_size = 5
-        #features = df.columns.tolist()
-        #features = list(features[0:features_size])
-        #df = df[features]
+        features_size = 30
+        features = df.columns.tolist()
+        features = list(features[0:features_size])
+        df = df[features]
         for i in window_sizes:
             features = df.columns.tolist()
             topk_stocks = TopK(df, i, features)
@@ -168,4 +168,4 @@ class Granger_investigation():
 
 
 GC = Granger_investigation()
-GC.Granger_Causality()
+GC.top_30_sp500
