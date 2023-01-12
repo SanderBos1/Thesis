@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: granger
+spec:
+  containers:
+    - name: granger
+      image: sanderbos/grangerdocker:latest
+      volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      imagePullPolicy: Always
+      resources:
+        limits:
+          cpu: 10000m
+          memory: 16Gi
+        requests:
+          cpu: 10000m
+          memory: 16Gi
+      securityContext:
+       allowPrivilegeEscalation: false
+       capabilities:
+          drop:
+            - ALL
+       readOnlyRootFilesystem: true
+       runAsGroup: 70
+       runAsNonRoot: true
+       runAsUser: 70
+  volumes:
+    - name: tmp
+      emptyDir: { }
+  imagePullSecrets:
+    - name: docker
+  securityContext:
+    seccompProfile:
+      type: RuntimeDefault
