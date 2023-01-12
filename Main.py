@@ -1,10 +1,9 @@
-from IntervalCount import CountInterval
-from GC_calculation import Grangercalculator
-from top_k import TopK
-from Data_Reader import DataManipulator
-import numpy as np
+from src.IntervalCount import CountInterval
+from src.GC_calculation import Grangercalculator
+from src.top_k import TopK
+from src.Data_Reader import DataManipulator
 import matplotlib.pyplot as plt
-from window_size import WindowSize
+from src.window_size import WindowSize
 import math
 
 
@@ -46,10 +45,10 @@ class Granger_investigation():
         df = df.loc[start_date:end_date]
         df = df.dropna(axis=1)
         # the following lines can be uncommented to prune the dataframe. This is done for testing purposes
-        features_size = 5
-        features = df.columns.tolist()
-        features = list(features[0:features_size])
-        df = df[features]
+        #features_size = 5
+        #features = df.columns.tolist()
+        #features = list(features[0:features_size])
+        #df = df[features]
         for i in window_sizes:
             features = df.columns.tolist()
             topk_stocks = TopK(df, i, features)
@@ -101,7 +100,7 @@ class Granger_investigation():
     # you are able to choose the amount of Bins
     def Count_intervals(self):
         # desired parameters
-        window_sizes = window_sizes = [5, 30, 40, 50]
+        window_sizes = window_sizes = [40, 50]
         start_date = '2016-01-01'
         end_date = '2016-07-01'
         # Defines the period of a timestep, in this case a day
@@ -126,10 +125,13 @@ class Granger_investigation():
             # parameters define how many variables you put in the casual relationships
             all = interval_count.Count_Intervals(3)
             # saves the results in a csv file
-            print(all)
+            np.savetxt("histogram" + str(i) + ".csv",
+                       all,
+                       delimiter=", ",
+                       fmt='% s')
 
     # use this method to plot desired features
-    def plot(features, df):
+    def plot(self, features, df):
         df.plot(x=None, y=features, kind="line", subplots=True)
         plt.savefig("Data/plot.png")
         plt.show()
@@ -152,9 +154,10 @@ class Granger_investigation():
         df = df.dropna(axis=1)
 
         # creates the df that determines the intervals
-        # variables = [['AAP', 'AAPL', 'CLX'], ['A', 'ADBE', 'CDNS'], ['AAP', 'CAH', 'CHRW'], ['ALK', 'CAT', 'CI'],
-                            # ['AEP', 'AFL', 'CAG'], ['AEP', 'ALK', 'CB']]
-        variables = [['A', 'ADBE', 'CDNS']]
+        variables = [['AAP', 'CLX'], ['A', 'CDNS'], ['AAP',  'CHRW'], ['ALK',  'CI'],
+                             ['AEP',  'CAG'], ['AEP',  'CB'], ['AAP', 'AAPL'], ['A', 'ADBE'], ['AAP', 'CAH'], ['ALK', 'CAT'],
+                             ['AEP', 'AFL'], ['AEP', 'ALK']]
+
         for i in window_sizes:
             features = df.columns.tolist()
             Granger_calculator = Grangercalculator(df, i, features)
@@ -165,4 +168,4 @@ class Granger_investigation():
 
 
 GC = Granger_investigation()
-GC.Count_intervals()
+GC.Granger_Causality()

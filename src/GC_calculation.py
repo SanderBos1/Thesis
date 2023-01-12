@@ -1,5 +1,5 @@
 import numpy as np
-from VAR import Var
+from src.VAR import Var
 from pyspark.sql import SparkSession
 
 
@@ -11,7 +11,6 @@ class Grangercalculator:
         self.features = features
 
     def GC_calculator(self, dep_var):
-        print(dep_var)
         variances = []
         scores = []
         # calculates the variance of the univariate model
@@ -41,15 +40,10 @@ class Grangercalculator:
         if len(dep_var) > 2:
             for i in range(3, len(dep_var)+1):
                 current = list(dep_var[:i])
-                print(current)
                 data = self.df[current].copy(deep=True)
                 VAR = Var(data, self.lag)
                 variance = VAR.var_calculation(current)
-                print(self.lag)
-                print(variance, "this is the variance")
-                print(variances[0], "this is the univeriate variance")
                 score = np.log(variances[0] / variance)
-                print("score", score)
                 scores.append([current, score])
         return scores
 
@@ -58,7 +52,7 @@ class Grangercalculator:
         granger_variables = stocks
 
         # creates a sparksession to be used, defines how many cores the program uses
-        spark = SparkSession.builder.master("local[6]") \
+        spark = SparkSession.builder.master("local[*]") \
         .getOrCreate()
         rdd = spark.sparkContext.parallelize(granger_variables)
 
