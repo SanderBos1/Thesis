@@ -23,6 +23,6 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Build the docker image
-        run: docker build . --file Dockerfile --tag sanderbos/Thesis
+        run: docker build . --file Dockerfile --tag sanderbos/grangerdocker
       - name: Docker Push
-        run: docker push ${{secrets.DOCKER_USER}}/Thesis
+        run: docker push ${{secrets.DOCKER_USER}}/grangerdocker
