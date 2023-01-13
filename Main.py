@@ -168,4 +168,4 @@ class Granger_investigation():
 
 
 GC = Granger_investigation()
-GC.top_30_sp500
+GC.top_30_sp500()
