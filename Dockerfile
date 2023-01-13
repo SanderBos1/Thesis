@@ -20,6 +20,6 @@ COPY  . .
 
 #uncomment the following line for debugging
 #ENTRYPOINT ["tail", "-f", "/dev/null"]
-CMD ["python" "./Main.py"]
+CMD ["python", "./Main.py"]
 
 
