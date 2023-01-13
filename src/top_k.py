@@ -1,3 +1,5 @@
+import findspark
+findspark.init()
 import numpy as np
 from itertools import combinations
 from src.VAR import Var
@@ -61,7 +63,7 @@ class TopK:
         # Makes a list of all combinations of stocks and creates a list
         granger_variables = list(combinations(self.features, nr_comb))
         # creates a sparksession to be used, defines how many cores the program uses
-        spark = SparkSession.builder.master("local[*]") \
+        spark = SparkSession.builder.master("local[5]") \
         .getOrCreate()
         rdd = spark.sparkContext.parallelize(granger_variables)
 
