@@ -49,6 +49,7 @@ class Granger_investigation():
         features = df.columns.tolist()
         features = list(features[0:features_size])
         df = df[features]
+        print(df)
         for i in window_sizes:
             features = df.columns.tolist()
             topk_stocks = TopK(df, i, features)
