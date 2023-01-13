@@ -23,20 +23,14 @@ RUN apt-get update -y && \
     rm spark.tgz
 
 
-
-RUN adduser sander
-USER sander
-WORKDIR /home/sander
-
-ENV VIRTUAL_ENV=/home/sander/opt/venv
+ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-ENV PATH="/home/sander/.local/bin:$PATH"
+ENV PATH=".local/bin:$PATH"
 
 ENV SPARK_HOME /usr/bin/spark-${spark_version}-bin-hadoop${hadoop_version}
 
-COPY --chown=sander:sander . .
 
 RUN pip install --upgrade pip
 RUN pip install pyspark==${PYSPARK_VERSION}
@@ -45,10 +39,11 @@ RUN pip install statsmodels
 RUN pip install matplotlib
 RUN pip install pandas
 
-ENV PYSPARK_PYTHON /home/sander/opt/venv/bin/python
+COPY . .
 
+ENV PYSPARK_PYTHON /opt/venv/bin/python
 #uncomment the following line for debugging
 #ENTRYPOINT ["tail", "-f", "/dev/null"]
-CMD ["python", "./Main.py"]
+CMD ["python",  "./Main.py"]
 
 
