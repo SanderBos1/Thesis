@@ -8,7 +8,7 @@ ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 ENV PATH="/.local/bin:$PATH"
-ENV PYSPARK_PYTHON /opt/venv/bin/python
+ENV PYSPARK_PYTHON /usr/bin/python3.9
 
 RUN pip3 install pyspark
 RUN pip3 install numpy
@@ -20,6 +20,6 @@ COPY  . .
 
 #uncomment the following line for debugging
 #ENTRYPOINT ["tail", "-f", "/dev/null"]
-CMD ["python", "./Main.py"]
+CMD ["python" "./Main.py"]
 
 
