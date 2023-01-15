@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from src.window_size import WindowSize
 import math
 import numpy as np
+import time
 
 class Granger_investigation():
 
@@ -45,11 +46,11 @@ class Granger_investigation():
         df = df.loc[start_date:end_date]
         df = df.dropna(axis=1)
         # the following lines can be uncommented to prune the dataframe. This is done for testing purposes
-        features_size = 30
-        features = df.columns.tolist()
-        features = list(features[0:features_size])
-        df = df[features]
-        print(df)
+        #features_size = 30
+        #features = df.columns.tolist()
+        #features = list(features[0:features_size])
+        #df = df[features]
+        #print(df)
         for i in window_sizes:
             features = df.columns.tolist()
             topk_stocks = TopK(df, i, features)
@@ -169,4 +170,11 @@ class Granger_investigation():
 
 
 GC = Granger_investigation()
+start = time.time()
+local_time_start = time.ctime(start)
+print("start", local_time_start)
 GC.top_30_sp500()
+end = time.time()
+local_time_end = time.ctime(end)
+print("end", local_time_end)
+print(end - start)
