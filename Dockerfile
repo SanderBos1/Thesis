@@ -1,4 +1,4 @@
-FROM bde2020/spark-submit:latest
+FROM apache/spark-py:latest
 
 USER root
 
@@ -22,5 +22,4 @@ COPY  . .
 #uncomment the following line for debugging
 #ENTRYPOINT ["tail", "-f", "/dev/null"]
 CMD ["python3", "./Main.py"]
-
 

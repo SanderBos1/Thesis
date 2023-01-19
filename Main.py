@@ -1,9 +1,11 @@
 from src.IntervalCount import CountInterval
 from src.GC_calculation import Grangercalculator
 from src.top_k import TopK
+from src.top_k_improvement import TopK_improved
 from src.Data_Reader import DataManipulator
 import matplotlib.pyplot as plt
 from src.window_size import WindowSize
+from statsmodels.tsa.api import VAR
 import math
 import numpy as np
 import time
@@ -46,11 +48,10 @@ class Granger_investigation():
         df = df.loc[start_date:end_date]
         df = df.dropna(axis=1)
         # the following lines can be uncommented to prune the dataframe. This is done for testing purposes
-        #features_size = 30
-        #features = df.columns.tolist()
-        #features = list(features[0:features_size])
-        #df = df[features]
-        #print(df)
+        features_size = 100
+        features = df.columns.tolist()
+        features = list(features[0:features_size])
+        df = df[features]
         for i in window_sizes:
             features = df.columns.tolist()
             topk_stocks = TopK(df, i, features)
@@ -61,7 +62,38 @@ class Granger_investigation():
                 print(i)
             print("the end")
 
-    # aims to calculate the low, middle and high value of the Granger causality.
+    def top_30_sp500_improved(self):
+        # desired parameters
+        window_sizes = [30]
+        start_date = '2016-01-01'
+        end_date = '2016-07-01'
+
+        # Defines the period of a timestep, in this case a day
+        sort_string = "D"
+        # the time-index of the dataset
+        index = "Date"
+        #where the dataset is stored
+        data_place = "Data/sp500_stocks.csv"
+        df = self.data_analyser(data_place, index, sort_string)
+        # prunes the dataset on the desired time period
+        df = df.loc[start_date:end_date]
+        df = df.dropna(axis=1)
+        # the following lines can be uncommented to prune the dataframe. This is done for testing purposes
+        features_size = 100
+        features = df.columns.tolist()
+        features = list(features[0:features_size])
+        df = df[features]
+        for i in window_sizes:
+            features = df.columns.tolist()
+            topk_stocks = TopK_improved(df, i, features)
+            # parameters define how many variables you put in the casual relationships
+            top_k = topk_stocks.finding_topk_granger(3)
+            # saves the results in a csv file
+            for i in top_k:
+                print(i)
+            print("the end")
+
+    # aims to calculate the low, middle and high davalue of the Granger causality.
     def take_GC(self):
         # desired parameters
         window_sizes = [30]
@@ -167,14 +199,35 @@ class Granger_investigation():
             GC_Values = Granger_calculator.finding_granger(variables)
             print(GC_Values)
 
-
+    def plotParameters(self):
+        window_size = 30
+        start_date = '2016-01-01'
+        end_date = '2016-07-01'
+        # Defines the period of a timestep, in this case a day
+        sort_string = "D"
+        # the time-index of the dataset
+        index = "Date"
+        #where the dataset is stored
+        data_place = "Data/sp500_stocks.csv"
+        df = self.data_analyser(data_place, index, sort_string)
+        # prunes the dataset on the desired time period
+        df = df.loc[start_date:end_date]
+        df = df.dropna(axis=1)
+        variables = ["AMGN", "MSFT", "NEE"]
+        df_desired = df[variables]
+        model = VAR(df_desired)
+        results = model.fit(window_size)
+        params = results.params[variables[0]]
+        plt.plot(params)
+        plt.show()
 
 GC = Granger_investigation()
-start = time.time()
-local_time_start = time.ctime(start)
-print("start", local_time_start)
-GC.top_30_sp500()
-end = time.time()
-local_time_end = time.ctime(end)
-print("end", local_time_end)
-print(end - start)
+GC.plotParameters()
+# start = time.time()
+# local_time_start = time.ctime(start)
+# print("start", local_time_start)
+# GC.top_30_sp500_improved()
+# end = time.time()
+# local_time_end = time.ctime(end)
+# print("end", local_time_end)
+#
