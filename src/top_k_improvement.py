@@ -15,8 +15,7 @@ class TopK_improved:
     def univariate_gc_calculator(self, dep_var):
         data = self.df[dep_var].copy(deep=True)
         VAR = Var(data, self.lag)
-        univariate = [dep_var]
-        variance = VAR.var_univariate(univariate)
+        variance = VAR.var_univariate()
         return [dep_var, variance]
 
     # function that calculates the variance of the residuals of the bi & multivariate model
@@ -60,7 +59,7 @@ class TopK_improved:
         y = [x, difference]
         return y
 
-    def finding_topk_granger(self, nr_comb):
+    def finding_topk_granger(self, nr_comb, stock):
         spark = SparkSession.builder.master("local[5]") \
         .getOrCreate()
 
@@ -72,7 +71,7 @@ class TopK_improved:
 
 
         # Makes a list of all combinations of stocks and creates a list
-        granger_variables = list(combinations(self.features, nr_comb))
+        granger_variables = list(combinations(stock, nr_comb))
         # creates a sparksession to be used, defines how many cores the program uses
 
         rdd = spark.sparkContext.parallelize(granger_variables)
@@ -83,6 +82,8 @@ class TopK_improved:
         # calculates and returns an array of the difference between the combinations
         rdd3 = rdd2.map(lambda x: self.difference_calc(x))
 
-        # takes the top 10 with the largest difference
-        rdd4 = rdd3.top(30, key=lambda x: x[1])
+        # takes the top 30 with the largest difference
+        #rdd4 = rdd3.top(30, key=lambda x: x[1])
+        #takes the top 30 lowest
+        rdd4 = rdd3.takeOrdered(30, key=lambda x: x[1])
         return rdd4

@@ -1,14 +1,9 @@
-from src.IntervalCount import CountInterval
-from src.GC_calculation import Grangercalculator
-from src.top_k import TopK
 from src.top_k_improvement import TopK_improved
 from src.Data_Reader import DataManipulator
-import matplotlib.pyplot as plt
-from src.window_size import WindowSize
-from statsmodels.tsa.api import VAR
-import math
-import numpy as np
+from src.support import Investigation
+from dtw import dtw
 import time
+
 
 class Granger_investigation():
 
@@ -16,7 +11,7 @@ class Granger_investigation():
         pass
 
     # prepares the data to a workable time-series
-    def data_analyser(self, data_string, index,  sort_string):
+    def data_analyser(self, data_string, index,  sort_string, detrend = True):
 
         datamanipulator_function = DataManipulator(data_string)
         df = datamanipulator_function.prepare(sort_string, index)
@@ -24,78 +19,31 @@ class Granger_investigation():
         # the next line can be uncommented to create a csv of the prepared dataset
         # df.to_csv('Data/sp500_nodetrending.csv')
         # the next line applies detrending by differencing
-        df = datamanipulator_function.detrend(df)
-        # removes the first value, since it is Nan
-        df = df.iloc[1:, :]
+        if detrend == True:
+            df = datamanipulator_function.detrend(df)
+            # removes the first value, since it is Nan
+            df = df.iloc[1:, :]
+        else:
+            print("hai")
         return df
 
-
-    # applies the top_k method on the desired parameters
-    def top_30_sp500(self):
-        # desired parameters
-        window_sizes = [30]
-        start_date = '2016-01-01'
-        end_date = '2016-07-01'
-
-        # Defines the period of a timestep, in this case a day
-        sort_string = "D"
-        # the time-index of the dataset
-        index = "Date"
-        #where the dataset is stored
-        data_place = "Data/sp500_stocks.csv"
-        df = self.data_analyser(data_place, index, sort_string)
-        # prunes the dataset on the desired time period
-        df = df.loc[start_date:end_date]
-        df = df.dropna(axis=1)
+    def top_30_sp500_improved(self, df, window_sizes):
         # the following lines can be uncommented to prune the dataframe. This is done for testing purposes
         features_size = 100
         features = df.columns.tolist()
-        features = list(features[0:features_size])
-        df = df[features]
-        for i in window_sizes:
-            features = df.columns.tolist()
-            topk_stocks = TopK(df, i, features)
-            # parameters define how many variables you put in the casual relationships
-            top_k = topk_stocks.finding_topk_granger(3)
-            # saves the results in a csv file
-            for i in top_k:
-                print(i)
-            print("the end")
-
-    def top_30_sp500_improved(self):
-        # desired parameters
-        window_sizes = [30]
-        start_date = '2016-01-01'
-        end_date = '2016-07-01'
-
-        # Defines the period of a timestep, in this case a day
-        sort_string = "D"
-        # the time-index of the dataset
-        index = "Date"
-        #where the dataset is stored
-        data_place = "Data/sp500_stocks.csv"
-        df = self.data_analyser(data_place, index, sort_string)
-        # prunes the dataset on the desired time period
-        df = df.loc[start_date:end_date]
-        df = df.dropna(axis=1)
-        # the following lines can be uncommented to prune the dataframe. This is done for testing purposes
-        features_size = 100
-        features = df.columns.tolist()
-        features = list(features[0:features_size])
+        stock = list(features[0:features_size])
         df = df[features]
         for i in window_sizes:
             features = df.columns.tolist()
             topk_stocks = TopK_improved(df, i, features)
             # parameters define how many variables you put in the casual relationships
-            top_k = topk_stocks.finding_topk_granger(3)
+            top_k = topk_stocks.finding_topk_granger(3, stock)
             # saves the results in a csv file
             for i in top_k:
                 print(i)
             print("the end")
 
-    # aims to calculate the low, middle and high davalue of the Granger causality.
-    def take_GC(self):
-        # desired parameters
+    def execution(self):
         window_sizes = [30]
         start_date = '2016-01-01'
         end_date = '2016-07-01'
@@ -104,130 +52,23 @@ class Granger_investigation():
         sort_string = "D"
         # the time-index of the dataset
         index = "Date"
-        #where the dataset is stored
+        # where the dataset is stored
         data_place = "Data/sp500_stocks.csv"
         df = self.data_analyser(data_place, index, sort_string)
         # prunes the dataset on the desired time period
         df = df.loc[start_date:end_date]
         df = df.dropna(axis=1)
-        # the following lines can be uncommented to prune the dataframe. This is done for testing purposes
-        # features_size = 5
-        # features = df.columns.tolist()
-        # features = list(features[0:features_size])
-        # df = df[features]
-        for i in window_sizes:
-            features = df.columns.tolist()
-            window_experiment = WindowSize(df, i, features)
-            # parameters define how many variables you put in the casual relationships
-            all = window_experiment.finding_All_granger(3)
-            first_below = all[0]
-            second_below = all[1]
-            first_up = all[-1]
-            second_up = all[-2]
-            first_middle = all[math.ceil(len(all) / 2)]
-            second_middle = all[math.ceil(len(all) / 2) + 1]
-            wanted = [first_below, second_below, first_middle, second_middle, second_up, first_up]
-            # saves the results in a csv file
-            print(wanted)
+        invest = Investigation()
+        answer = invest.top_30_sp500(df, window_sizes)
+        #answer = invest.plotParameters(df, 30, True, False)
+        return answer
 
-    # calculates a histogram of the grangercausality of desired window_size
-    # you are able to choose the amount of Bins
-    def Count_intervals(self):
-        # desired parameters
-        window_sizes = window_sizes = [40, 50]
-        start_date = '2016-01-01'
-        end_date = '2016-07-01'
-        # Defines the period of a timestep, in this case a day
-        sort_string = "D"
-        # the time-index of the dataset
-        index = "Date"
-        #where the dataset is stored
-        data_place = "Data/sp500_stocks.csv"
-        df = self.data_analyser(data_place, index, sort_string)
-        # prunes the dataset on the desired time period
-        df = df.loc[start_date:end_date]
-        df = df.dropna(axis=1)
-        # the following lines can be uncommented to prune the dataframe. This is done for testing purposes
-        #features_size = 5
-        #features = df.columns.tolist()
-        #features = list(features[0:features_size])
-        #df = df[features]
-        # creates the df that determines the intervals
-        for i in window_sizes:
-            features = df.columns.tolist()
-            interval_count = CountInterval(df, i, features)
-            # parameters define how many variables you put in the casual relationships
-            all = interval_count.Count_Intervals(3)
-            # saves the results in a csv file
-            np.savetxt("histogram" + str(i) + ".csv",
-                       all,
-                       delimiter=", ",
-                       fmt='% s')
-
-    # use this method to plot desired features
-    def plot(self, features, df):
-        df.plot(x=None, y=features, kind="line", subplots=True)
-        plt.savefig("Data/plot.png")
-        plt.show()
-
-    # Calculates the GC of desired variables
-    def Granger_Causality(self):
-        # desired parameters
-        window_sizes = [5, 30, 40, 50]
-        start_date = '2016-01-01'
-        end_date = '2016-07-01'
-        # Defines the period of a timestep, in this case a day
-        sort_string = "D"
-        # the time-index of the dataset
-        index = "Date"
-        #where the dataset is stored
-        data_place = "Data/sp500_stocks.csv"
-        df = self.data_analyser(data_place, index, sort_string)
-        # prunes the dataset on the desired time period
-        df = df.loc[start_date:end_date]
-        df = df.dropna(axis=1)
-
-        # creates the df that determines the intervals
-        variables = [['AAP', 'CLX'], ['A', 'CDNS'], ['AAP',  'CHRW'], ['ALK',  'CI'],
-                             ['AEP',  'CAG'], ['AEP',  'CB'], ['AAP', 'AAPL'], ['A', 'ADBE'], ['AAP', 'CAH'], ['ALK', 'CAT'],
-                             ['AEP', 'AFL'], ['AEP', 'ALK']]
-
-        for i in window_sizes:
-            features = df.columns.tolist()
-            Granger_calculator = Grangercalculator(df, i, features)
-            # parameters define how many variables you put in the casual relationships
-            GC_Values = Granger_calculator.finding_granger(variables)
-            print(GC_Values)
-
-    def plotParameters(self):
-        window_size = 30
-        start_date = '2016-01-01'
-        end_date = '2016-07-01'
-        # Defines the period of a timestep, in this case a day
-        sort_string = "D"
-        # the time-index of the dataset
-        index = "Date"
-        #where the dataset is stored
-        data_place = "Data/sp500_stocks.csv"
-        df = self.data_analyser(data_place, index, sort_string)
-        # prunes the dataset on the desired time period
-        df = df.loc[start_date:end_date]
-        df = df.dropna(axis=1)
-        variables = ["AMGN", "MSFT", "NEE"]
-        df_desired = df[variables]
-        model = VAR(df_desired)
-        results = model.fit(window_size)
-        params = results.params[variables[0]]
-        plt.plot(params)
-        plt.show()
 
 GC = Granger_investigation()
-GC.plotParameters()
-# start = time.time()
-# local_time_start = time.ctime(start)
-# print("start", local_time_start)
-# GC.top_30_sp500_improved()
-# end = time.time()
-# local_time_end = time.ctime(end)
-# print("end", local_time_end)
-#
+start = time.time()
+local_time_start = time.ctime(start)
+print("start", local_time_start)
+GC.execution()
+end = time.time()
+local_time_end = time.ctime(end)
+print("end", local_time_end)
