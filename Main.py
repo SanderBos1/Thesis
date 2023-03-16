@@ -58,17 +58,13 @@ class Granger_investigation():
     def pruning_check(self, df):
 
         df = self.znormalization(df)
-        print(df)
         features_size = 5
         features = df.columns.tolist()
-        stocks = list(features[0:features_size])
-        stocks = list(combinations(stocks, 2))
-        print(stocks)
+        stocks = [["A", "AAL"], ["AAP", "A"], ["AAP", "AAL"]]
         Granger_calculator = Grangercalculator_distance(df, 1, features)
         # parameters define how many variables you put in the casual relationships
-        GC_Values = Granger_calculator.finding_granger(stocks)
-        for j in GC_Values:
-            print(j[0])
+        GC_Values = Granger_calculator.GC_calculator(stocks)
+        return GC_Values
 
 
     def execution(self):
