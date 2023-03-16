@@ -22,7 +22,6 @@ class Grangercalculator:
         var_uni = univariate[0][1]
         # calculates the GC of all possible bivariate model and takes the highest
 
-
         current = list(dep_var)
         data = self.df[current].copy(deep=True)
         VAR = Var(data, self.lag)
@@ -36,7 +35,7 @@ class Grangercalculator:
         # Makes a list of all combinations of stocks and creates a list
         spark = SparkSession.builder.master("local[5]") \
         .getOrCreate()
-        #calculate the variance of all univariate models
+
         univariate_variables = list(self.features)
         uni_rdd = spark.sparkContext.parallelize(univariate_variables)
         uni_rdd1 = uni_rdd.map(lambda x: self.univariate_gc_calculator(x))

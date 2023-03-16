@@ -15,8 +15,8 @@ class Var:
         # calculate the residuals of the model and takes its variance
         resid = model.resid
         var = np.var(resid)
-
         return var
+
     def var_calculation(self, variables):
         # For more than one time-serie a Vector autoregression model is calculated
         model = VAR(self.data)

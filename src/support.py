@@ -1,3 +1,5 @@
+from itertools import combinations
+
 from src.top_k import TopK
 from src.window_size import WindowSize
 from src.IntervalCount import CountInterval
@@ -16,13 +18,13 @@ class Investigation:
         pass
 
         # applies the top_k method on the desired parameters
-    def top_30_sp500(self, df, window_sizes, reversed = False):
+    def top_30_sp500(self, df, lag_sizes, reversed = False):
         # the following lines can be uncommented to prune the dataframe. This is done for testing purposes
         features_size = 5
         features = df.columns.tolist()
         stock = list(features[0:features_size])
         df = df[features]
-        for i in window_sizes:
+        for i in lag_sizes:
             features = df.columns.tolist()
             topk_stocks = TopK(df, i, features)
             # parameters define how many variables you put in the casual relationships
@@ -33,13 +35,13 @@ class Investigation:
             print("the end")
 
     # aims to calculate the low, middle and high davalue of the Granger causality.
-    def take_GC(self, df, window_sizes):
+    def take_GC(self, df, lag_sizes):
         # the following lines can be uncommented to prune the dataframe. This is done for testing purposes
         # features_size = 5
         # features = df.columns.tolist()
         # features = list(features[0:features_size])
         # df = df[features]
-        for i in window_sizes:
+        for i in lag_sizes:
             features = df.columns.tolist()
             window_experiment = WindowSize(df, i, features)
             # parameters define how many variables you put in the casual relationships
@@ -56,14 +58,14 @@ class Investigation:
 
     # calculates a histogram of the grangercausality of desired window_size
     # you are able to choose the amount of Bins
-    def Count_intervals(self, df, window_sizes):
+    def Count_intervals(self, df, lag_sizes):
         # the following lines can be uncommented to prune the dataframe. This is done for testing purposes
         #features_size = 5
         #features = df.columns.tolist()
         #features = list(features[0:features_size])
         #df = df[features]
         # creates the df that determines the intervals
-        for i in window_sizes:
+        for i in lag_sizes:
             features = df.columns.tolist()
             interval_count = CountInterval(df, i, features)
             # parameters define how many variables you put in the casual relationships
@@ -75,18 +77,33 @@ class Investigation:
                        fmt='% s')
 
     # Calculates the GC of desired variables
-    def Granger_Causality(self, df, window_sizes):
+    def Granger_Causality(self, df, lag_sizes):
         # desired parameters
-        variables =[["AMGN", "MSFT"],["FCX", "WY"], ["CFG", "LYB"],["CTLT","MTCH"],
-        ["LIN", "MPC"],  ["CME","NLOK"], ["AKAM", "PEG"],["ANSS", "EW"], ["ABMD", "VLO"], ["AEP", "ALK"]]
+        # variables =[["AMGN", "NEE"],["FCX", "VRSK"], ["CFG", "MCK"],["CTLT","GNRC"],
+        # ["LIN", "LYV"],  ["CME","CVS"], ["AKAM", "EXPE"],["ANSS", "ESS"], ["ABMD", "REGN"], ["AEP", "CB"], ["AMGN", "MSFT"],["FCX", "WY"], ["CFG", "LYB"],["CTLT","MTCH"],
+        # ["LIN", "MPC"],  ["CME","NLOK"], ["AKAM", "PEG"],["ANSS", "EW"], ["ABMD", "VLO"], ["AEP", "ALK"]]
 
-        for i in window_sizes:
+        # variables = [['AIG', 'AON'], ['AMAT', 'CB'], ['BMY', 'CI'], ['AFL', 'BK']
+        #     , ['AIZ', 'CCL'], ['AAP', 'CLX'], ['AIG', 'APH'], ['AMZN', 'BMY'], ['A', 'CDNS'],
+        #  ['ALLE', 'CHD'], ['AIG', 'AWK'], ['AMAT', 'CBOE'], ['BMY', 'CHD'], ['AFL', 'AXP']
+        #   , ['AIZ', 'BAC'], ['AAP', 'AAPL'], ['AIG', 'AWK'], ['AMZN', 'CE'], ['A', 'ADBE'], ['ALLE', 'BRO']]
+
+        # variables = [['AON', 'AWK'], [ 'CB', 'CBOE'], ['CHD', 'CI'], ['AXP', 'BK']
+        # , ['BAC', 'CCL'], ['AAPL', 'CLX'], ['APH', 'AWK'], ['BMY', 'CE'], ['ADBE', 'CDNS'],
+        # ['BRO', 'CHD']]
+        variables = [['AWK', 'AON', 'AIG']]
+
+        # variable = ['AMGN', 'FCX', 'CFG', 'CTLT', 'LIN', 'CME', 'AKAM', 'ANSS', 'ABMD', 'AEP']
+        # variable = list(set(variable))
+        # variables = list(combinations(variable, 3))
+
+        for i in lag_sizes:
             features = df.columns.tolist()
             Granger_calculator = Grangercalculator(df, i, features)
             # parameters define how many variables you put in the casual relationships
             GC_Values = Granger_calculator.finding_granger(variables)
             for j in GC_Values:
-                print(j)
+                    print(j[0])
 
     def plotParameters(self, df, window_size, residuals=False, params=True):
 
