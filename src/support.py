@@ -78,24 +78,8 @@ class Investigation:
 
     # Calculates the GC of desired variables
     def Granger_Causality(self, df, lag_sizes):
-        # desired parameters
-        # variables =[["AMGN", "NEE"],["FCX", "VRSK"], ["CFG", "MCK"],["CTLT","GNRC"],
-        # ["LIN", "LYV"],  ["CME","CVS"], ["AKAM", "EXPE"],["ANSS", "ESS"], ["ABMD", "REGN"], ["AEP", "CB"], ["AMGN", "MSFT"],["FCX", "WY"], ["CFG", "LYB"],["CTLT","MTCH"],
-        # ["LIN", "MPC"],  ["CME","NLOK"], ["AKAM", "PEG"],["ANSS", "EW"], ["ABMD", "VLO"], ["AEP", "ALK"]]
 
-        # variables = [['AIG', 'AON'], ['AMAT', 'CB'], ['BMY', 'CI'], ['AFL', 'BK']
-        #     , ['AIZ', 'CCL'], ['AAP', 'CLX'], ['AIG', 'APH'], ['AMZN', 'BMY'], ['A', 'CDNS'],
-        #  ['ALLE', 'CHD'], ['AIG', 'AWK'], ['AMAT', 'CBOE'], ['BMY', 'CHD'], ['AFL', 'AXP']
-        #   , ['AIZ', 'BAC'], ['AAP', 'AAPL'], ['AIG', 'AWK'], ['AMZN', 'CE'], ['A', 'ADBE'], ['ALLE', 'BRO']]
-
-        # variables = [['AON', 'AWK'], [ 'CB', 'CBOE'], ['CHD', 'CI'], ['AXP', 'BK']
-        # , ['BAC', 'CCL'], ['AAPL', 'CLX'], ['APH', 'AWK'], ['BMY', 'CE'], ['ADBE', 'CDNS'],
-        # ['BRO', 'CHD']]
-        variables = [['AWK', 'AON', 'AIG']]
-
-        # variable = ['AMGN', 'FCX', 'CFG', 'CTLT', 'LIN', 'CME', 'AKAM', 'ANSS', 'ABMD', 'AEP']
-        # variable = list(set(variable))
-        # variables = list(combinations(variable, 3))
+        variables = [["A", "AAL"], ["AAP", "A"], ["AAP", "AAL"]]
 
         for i in lag_sizes:
             features = df.columns.tolist()
@@ -106,29 +90,6 @@ class Investigation:
                     print(j[0])
 
     def plotParameters(self, df, window_size, residuals=False, params=True):
-
-        # variables =[["AMGN", "MSFT"],["FCX", "WY"], ["CFG", "LYB"],["CTLT","MTCH"],
-        # ["LIN", "MPC"],  ["CME","NLOK"], ["AKAM", "PEG"],["ANSS", "EW"], ["ABMD", "VLO"], ["AEP", "ALK"]]
-        # #
-        # variables =[["AMGN", "NEE"],["FCX", "VRSK"], ["CFG", "MCK"],["CTLT","GNRC"],
-        # ["LIN", "LYV"],  ["CME","CVS"], ["AKAM", "EXPE"],["ANSS", "ESS"], ["ABMD", "REGN"], ["AEP", "CB"]]
-
-        # variables =[["MSFT", "NEE"] ,["VRSK", "WY"], ["LYB", "MCK"],["GNRC", "MTCH"],
-        # ["LYV", "MPC"],  ["CVS", "NLOK"], ["EXPE", "PEG"],["ESS", "EW"], ["REGN", "VLO"], ["ALK", "CB"]]
-
-        # variables =[["AMGN", "MSFT", "NEE"] ,["FCX", "VRSK", "WY"], ["CFG", "LYB", "MCK"],["CTLT","GNRC", "MTCH"],
-        # ["LIN", "LYV", "MPC"],  ["CME","CVS", "NLOK"], ["AKAM","EXPE", "PEG"],["ANSS", "ESS", "EW"], ["ABMD", "REGN", "VLO"], ["AEP", "ALK", "CB"]]
-
-        # variables = [['AIG', 'AON'], ['AMAT', 'CB'], ['BMY', 'CI'], ['AFL', 'BK']
-        #     , ['AIZ', 'CCL'], ['AAP', 'CLX'], ['AIG', 'APH'], ['AMZN', 'BMY'], ['A', 'CDNS'],
-        #              ['ALLE', 'CHD']]
-
-        # variables = [['AIG', 'AWK'], ['AMAT', 'CBOE'], ['BMY', 'CHD'], ['AFL', 'AXP']
-        #     , ['AIZ', 'BAC'], ['AAP', 'AAPL'], ['AIG', 'AWK'], ['AMZN', 'CE'], ['A', 'ADBE'], ['ALLE', 'BRO']]
-        #
-        # variables = [['AON', 'AWK'], [ 'CB', 'CBOE'], ['CHD', 'CI'], ['AXP', 'BK']
-        #     , ['BAC', 'CCL'], ['AAPL', 'CLX'], ['APH', 'AWK'], ['BMY', 'CE'], ['ADBE', 'CDNS'],
-        # ['BRO', 'CHD']]
 
         variables = [['AIG', 'AON', 'AWK'], ['AMAT', 'CB', 'CBOE'], ['BMY', 'CHD', 'CI'], ['AFL', 'AXP', 'BK']
              , ['AIZ', 'BAC', 'CCL'], ['AAP', 'AAPL', 'CLX'], ['AIG', 'APH', 'AWK'], ['AMZN', 'BMY', 'CE'], ['A', 'ADBE', 'CDNS'],
