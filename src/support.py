@@ -1,10 +1,7 @@
 from itertools import combinations
-
-from src.top_k import TopK
 from src.window_size import WindowSize
 from src.IntervalCount import CountInterval
 from src.GC_calculation import Grangercalculator
-
 import matplotlib.pyplot as plt
 from statsmodels.tsa.api import VAR
 import numpy as np
@@ -16,23 +13,6 @@ class Investigation:
 
     def __init__(self):
         pass
-
-        # applies the top_k method on the desired parameters
-    def top_30_sp500(self, df, lag_sizes, reversed = False):
-        # the following lines can be uncommented to prune the dataframe. This is done for testing purposes
-        features_size = 5
-        features = df.columns.tolist()
-        stock = list(features[0:features_size])
-        df = df[features]
-        for i in lag_sizes:
-            features = df.columns.tolist()
-            topk_stocks = TopK(df, i, features)
-            # parameters define how many variables you put in the casual relationships
-            top_k = topk_stocks.finding_topk_granger(3, stock, reversed)
-            # saves the results in a csv file
-            for i in top_k:
-                print(i)
-            print("the end")
 
     # aims to calculate the low, middle and high davalue of the Granger causality.
     def take_GC(self, df, lag_sizes):

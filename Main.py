@@ -1,7 +1,7 @@
 from src.GC_calculation_distance import Grangercalculator_distance
 from src.Pruning import Pruning
 from src.support import Investigation
-from src.top_k_improvement import TopK_improved
+from src.top_k import TopK_improved
 from src.Data_Reader import DataManipulator
 from sklearn import preprocessing
 import pandas as pd
@@ -50,21 +50,10 @@ class Granger_investigation():
         df = pd.DataFrame(x_scaled, columns=df.columns)
         return df
 
-    def pruning_check(self, df):
-
-        df = self.znormalization(df)
-        features = df.columns.tolist()
-        # (y, x), (z, y), (z, x)
-        stocks = [["A", "AAL"], ["AAP", "A"], ["AAP", "AAL"]]
-        Granger_calculator = Grangercalculator_distance(df, 1, features)
-        # parameters define how many variables you put in the casual relationships
-        GC_Values = Granger_calculator.GC_calculator_test(stocks)
-        return GC_Values
-
     def execution(self):
         lag_sizes = [1]
-        start_date = '2016-01-05'
-        end_date = '2016-01-31'
+        start_date = '2016-01-01'
+        end_date = '2016-07-01'
 
         # Defines the period of a timestep, in this case a day
         sort_string = "D"
@@ -77,19 +66,27 @@ class Granger_investigation():
         # prunes the dataset on the desired time period
         df = df.loc[start_date:end_date]
         df = df.dropna(axis=1)
-        features_size = 20
+        features_size = 500
         features = df.columns.tolist()
         stock = list(features[0:features_size])
         df = df[stock]
-        #invest = Investigation()
-        #answer = invest.Granger_Causality(df, lag_sizes)
-        #GC = Granger_investigation()
-        #answer = GC.pruning_check(df)
+
+       # Helps with exploring the behaviour of distances between created models
+       # Stocks are of the form (Z, X), (Z, Y),(Y, X)
+        stocks = [["AMGN", "MSFT"],["AMGN", "NEE"],["NEE", "MSFT"]]
+
         df = self.znormalization(df)
-        pruning = Pruning(df)
-        root = pruning.set_root(df)
-        pruning.HierarchicalClustering(root, 4, 3, 0.8, 5, 2)
-        answer = 5
+        GC = Grangercalculator_distance(df, 1)
+        answer = GC.GC_calculator(stocks)
+
+
+       # Aims to calculate the pruning
+       #  df = self.znormalization(df)
+       #  pruning = Pruning(df)
+       #  root = pruning.set_root(df)
+       #  pruning.HierarchicalClustering(root, 4, 3, 0.8, 5, 2)
+       #  answer = 5
+
         return answer
 
 

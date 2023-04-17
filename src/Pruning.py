@@ -2,8 +2,6 @@ import random
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import pylab as p
-from sklearn.preprocessing import StandardScaler
 from scipy.spatial import distance
 
 class Pruning:
@@ -11,13 +9,6 @@ class Pruning:
     def __init__(self, df):
        self.df = df
        self.distances = []
-
-    def znormalized(self):
-        array = self.df.to_numpy()
-        standard_scaler = StandardScaler()
-        x_scaled = standard_scaler.fit_transform(array)
-        self.df = pd.DataFrame(x_scaled, columns=self.df.columns)
-        return(x_scaled.T)
 
     # converts the whole dataframe to a cluster (the root)
     def set_root(self, df):
@@ -63,7 +54,6 @@ class Pruning:
         return s
 
 
-
     def HierarchicalClustering(self, P, e, K, alpha, h_max, n_rep):
         #print(P)
         #print(P.members)
@@ -71,7 +61,6 @@ class Pruning:
         S_start = []
         # Perform repetitions and find best clustering
         for i in range(n_rep):
-            print(P.members)
             P.shuffle()
             print("shuffled", P.members)
             S = self.clustering(P, e, K)
@@ -95,7 +84,7 @@ class Pruning:
                     self.HierarchicalClustering(cluster, e, K, alpha, h_max, n_rep)
                 else:
                     self.HierarchicalClustering(cluster, 0, len(cluster.members), alpha, h_max, n_rep)
-
+        print("this is the final object", S_start)
 
 class Cluster:
 
@@ -115,3 +104,4 @@ class Cluster:
 
     def shuffle(self):
         np.random.shuffle(self.members)
+
