@@ -59,7 +59,8 @@ class Investigation:
     # Calculates the GC of desired variables
     def Granger_Causality(self, df, lag_sizes):
 
-        variables = [["A", "AAL"], ["AAP", "A"], ["AAP", "AAL"]]
+        variables = [["AMGN", "MSFT"], ["FCX", "WY"], ["CFG", "LYB"],["CTLT", "MTCH"], ["LIN", "MPC"],
+                     ["CME", "NLOK"],[ "AKAM", "PEG"] ,["ANSS", "EW"], ["ABMD", "VLO"],["AEP", "ALK"]]
 
         for i in lag_sizes:
             features = df.columns.tolist()

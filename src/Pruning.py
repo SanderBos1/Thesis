@@ -55,8 +55,6 @@ class Pruning:
 
 
     def HierarchicalClustering(self, P, e, K, alpha, h_max, n_rep):
-        #print(P)
-        #print(P.members)
         score_begin = float("inf")
         S_start = []
         # Perform repetitions and find best clustering

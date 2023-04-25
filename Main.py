@@ -1,5 +1,7 @@
 from src.GC_calculation_distance import Grangercalculator_distance
 from src.Pruning import Pruning
+import scipy.stats as stats
+
 from src.support import Investigation
 from src.top_k import TopK_improved
 from src.Data_Reader import DataManipulator
@@ -44,16 +46,13 @@ class Granger_investigation():
             print("the end")
 
     def znormalization(self, df):
-        array = df.to_numpy()
-        standard_scaler = preprocessing.StandardScaler()
-        x_scaled = standard_scaler.fit_transform(array)
-        df = pd.DataFrame(x_scaled, columns=df.columns)
+        df = df.apply(stats.zscore)
         return df
 
     def execution(self):
         lag_sizes = [1]
         start_date = '2016-01-01'
-        end_date = '2016-07-01'
+        end_date = '2016-03-01'
 
         # Defines the period of a timestep, in this case a day
         sort_string = "D"
@@ -66,19 +65,27 @@ class Granger_investigation():
         # prunes the dataset on the desired time period
         df = df.loc[start_date:end_date]
         df = df.dropna(axis=1)
-        features_size = 500
-        features = df.columns.tolist()
-        stock = list(features[0:features_size])
-        df = df[stock]
-
-       # Helps with exploring the behaviour of distances between created models
-       # Stocks are of the form (Z, X), (Z, Y),(Y, X)
-        stocks = [["AMGN", "MSFT"],["AMGN", "NEE"],["NEE", "MSFT"]]
+        # features_size = 500
+        # features = df.columns.tolist()
+        # stock = list(features[0:features_size])
+        # df = df[stock]
 
         df = self.znormalization(df)
+        print(df)
+        # # Helps with exploring the behaviour of distances between created models
+        # # Stocks are of the form (X, Z), (Y, Z),(X, Y)
+        stocks = [[["MSFT", "AMGN"],["NEE", "AMGN"],["MSFT", "NEE"]], [["WY", "FCX"],["VRSK", "FCX"],["WY", "VRSK"]],
+                 [["LYB", "CFG"],["MCK", "CFG"],["LYB", "MCK"]],[["MTCH", "CTLT"],["GNRC", "CTLT"],
+                 ["MTCH", "GNRC"]], [["MPC", "LIN"],["LYV", "LIN"],["MPC", "LYV"]],[["NLOK", "CME"],["CVS", "CME"],
+                 ["NLOK", "CVS"]], [["PEG", "AKAM"],["EXPE", "AKAM"],["PEG", "EXPE"]],
+                [["EW", "ANSS"],["ESS", "ANSS"],["EW", "ESS"]],
+                [["VLO", "ABMD"], ["REGN", "ABMD"], ["VLO", "REGN"]], [["ALK", "AEP"],["CB", "AEP"],["ALK", "CB"]]]
+
         GC = Grangercalculator_distance(df, 1)
         answer = GC.GC_calculator(stocks)
-
+        # Aims to calculate Granger causality of requested pair or tuple of variables
+        # investigation = Investigation()
+        # answer = investigation.Granger_Causality(df, lag_sizes)
 
        # Aims to calculate the pruning
        #  df = self.znormalization(df)
@@ -86,7 +93,8 @@ class Granger_investigation():
        #  root = pruning.set_root(df)
        #  pruning.HierarchicalClustering(root, 4, 3, 0.8, 5, 2)
        #  answer = 5
-
+        for i in answer:
+            print(i)
         return answer
 
 

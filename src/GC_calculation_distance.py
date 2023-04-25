@@ -1,5 +1,8 @@
+import math
+
 import numpy as np
 
+from src.VAR import Var
 from src.VAR_distance import Var_distance
 from scipy.spatial import distance
 
@@ -13,30 +16,45 @@ class Grangercalculator_distance:
     def GC_calculator(self, stocks):
         distances = []
         dist_x_y = 0
-        for j in range(len(stocks)):
-            data = self.df[list(stocks[j])].copy(deep=True)
-            VAR = Var_distance(data, self.lag)
-            params = VAR.var_calculation(list(stocks[j]))
-            first = data[data.columns[0]].to_numpy()
-            second = data[data.columns[1]].to_numpy()
-            first_converted = []
-            second_converted = []
-            for i in range(len(first)-1):
-                answer = params[1] * first[i]
-                first_part = first[i+1] - answer
-                first_converted.append(first_part)
-            for i in range(len(second)-1):
-                answer = params[2] * second[i]
-                second_converted.append(answer)
-            if j == 0:
-                mean_zx = (np.mean((first-first_converted)-second_converted))**2
-                euclidean_zx = distance.euclidean((first - first_converted),second_converted)
-            if j == 1:
-                distance_yGCz = distance.euclidean((first - first_converted), second_converted)
-                y_inygcZ = second_converted
-            else:
-                distance_xGCy = distance.euclidean((first - first_converted), second_converted)
-                x_inxgcy = second_converted
-        return "mean_zx", mean_zx,"euclidean_zx", euclidean_zx, "distance_yGCz", distance_yGCz, "y_inygcZ", y_inygcZ,\
-               "distance_xGCy", distance_xGCy, "distance_xGCy", distance_xGCy, "x_inxgcy", x_inxgcy
+        for k in stocks:
+            for j in range(len(k)):
+                data = self.df[list(k[j])].copy(deep=True)
+                VAR = Var_distance(data, self.lag)
+                params, l2norm, whole = VAR.var_calculation(list(k[j]))
+                second = data[data.columns[0]].to_numpy()
+                second_converted = []
+                for i in range(len(second)-1):
+                    answer = params[1] * second[i]
+                    second_converted.append(answer)
+                # x GC Z
+                if j == 0:
+                    #print(stocks[j][1])
+                    data_uni = self.df[k[j][1]].copy(deep=True)
+                    VAR_uni = Var(data_uni, self.lag)
+                    variance_uni = VAR_uni.var_univariate()
+                    print("var", variance_uni)
+                    mean_zx = (np.mean(whole))**2
+                    print("mean_zx", mean_zx)
+                    real = l2norm
+                # Y GC Z
+                if j == 1:
+                    distance_yGCz = l2norm
+                    y_inygcZ = second_converted
+                # X GC Y
+                if j == 2:
+                    distance_xGCy = l2norm
+                    x_inxgcy = second_converted
+
+                    xy = distance.euclidean(x_inxgcy, y_inygcZ)
+                    Tau = 0.05
+                    Tau_exp = math.exp(Tau)
+                    print("tau_exp", Tau_exp)
+                    W = 60
+                    lower_bound = (abs(abs(abs(xy- distance_yGCz) - distance_xGCy)-distance_xGCy))
+                    Upperbound = (distance_yGCz + xy + 2*distance_xGCy)
+                    GC_Threshold = (variance_uni/Tau_exp)
+                    distances.append([[Tau, W, lower_bound, real, Upperbound, GC_Threshold, (real)**2/W], k])
+        #print("interest", distance_yGCz, euclidean_zx,xy, distance_xGCy,  Tau_exp, mean_zx)
+
+        return distances
 
