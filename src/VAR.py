@@ -21,6 +21,7 @@ class Var:
         # For more than one time-serie a Vector autoregression model is calculated
         model = VAR(self.data)
         results = model.fit(self.lag)
+        print(results.summary())
         # calculate the residuals of the model and takes its variance
         resid = results.resid
         var = np.var(resid[variables[0]])

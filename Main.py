@@ -1,3 +1,7 @@
+from datetime import datetime
+
+import numpy as np
+
 from src.GC_calculation_distance import Grangercalculator_distance
 from src.Pruning import Pruning
 import scipy.stats as stats
@@ -45,14 +49,10 @@ class Granger_investigation():
                 print(i)
             print("the end")
 
-    def znormalization(self, df):
-        df = df.apply(stats.zscore)
-        return df
-
     def execution(self):
         lag_sizes = [1]
-        start_date = '2016-01-01'
-        end_date = '2016-03-01'
+        start_date = '2016/01/01'
+        end_date = '2016/05/01'
 
         # Defines the period of a timestep, in this case a day
         sort_string = "D"
@@ -65,13 +65,15 @@ class Granger_investigation():
         # prunes the dataset on the desired time period
         df = df.loc[start_date:end_date]
         df = df.dropna(axis=1)
+        # z-normalizes the dataset (mean 0, var 1)
+        df = df.apply(stats.zscore)
+
+        ## The following code can be used to prune the dataset for testing purposes
         # features_size = 500
         # features = df.columns.tolist()
         # stock = list(features[0:features_size])
         # df = df[stock]
 
-        df = self.znormalization(df)
-        print(df)
         # # Helps with exploring the behaviour of distances between created models
         # # Stocks are of the form (X, Z), (Y, Z),(X, Y)
         stocks = [[["MSFT", "AMGN"],["NEE", "AMGN"],["MSFT", "NEE"]], [["WY", "FCX"],["VRSK", "FCX"],["WY", "VRSK"]],
@@ -81,8 +83,15 @@ class Granger_investigation():
                 [["EW", "ANSS"],["ESS", "ANSS"],["EW", "ESS"]],
                 [["VLO", "ABMD"], ["REGN", "ABMD"], ["VLO", "REGN"]], [["ALK", "AEP"],["CB", "AEP"],["ALK", "CB"]]]
 
+        # Calculates the window_size
+        d1 = datetime.strptime(start_date, "%Y/%m/%d")
+        d2 = datetime.strptime(end_date, "%Y/%m/%d")
+        W = d2 - d1
+        W = W.days-1
+
+
         GC = Grangercalculator_distance(df, 1)
-        answer = GC.GC_calculator(stocks)
+        answer = GC.GC_calculator(stocks, W, 0.05)
         # Aims to calculate Granger causality of requested pair or tuple of variables
         # investigation = Investigation()
         # answer = investigation.Granger_Causality(df, lag_sizes)
@@ -95,6 +104,7 @@ class Granger_investigation():
        #  answer = 5
         for i in answer:
             print(i)
+
         return answer
 
 

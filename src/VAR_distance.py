@@ -13,13 +13,13 @@ class Var_distance:
         model = VAR(self.data)
         results = model.fit(self.lag)
 
+        # takes the coefficients of the var model
         params = results.params[results.params.columns[1]].to_numpy()
         resid = np.array(results.resid[variables[1]])
-        print("residuals_bivariate", np.var(resid))
         coefficient = params[0]
-        whole = resid-coefficient
-        l2norm = np.linalg.norm((whole), ord=2)
-
+        whole = resid+coefficient
+        l2norm = np.linalg.norm((whole))
+        print(np.mean(whole), "whole mean")
         return params, l2norm, whole
 
 
