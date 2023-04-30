@@ -19,9 +19,8 @@ class Var_distance:
         coefficient = params[0]
         whole = resid+coefficient
         l2norm = np.linalg.norm((whole))
-        print(np.mean(whole), "whole mean")
-        return params, l2norm, whole
 
+        return params, l2norm
 
 
 

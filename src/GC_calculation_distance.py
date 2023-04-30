@@ -24,7 +24,7 @@ class Grangercalculator_distance:
                 data = self.df[list(pair[j])].copy(deep=True)
                 VAR = Var_distance(data, self.lag)
 
-                params, l2norm, whole = VAR.var_calculation(list(pair[j]))
+                params, l2norm = VAR.var_calculation(list(pair[j]))
 
                 # Calculates the value of the past values of the second stock * it's coefficient value in the formula.
                 second = data[data.columns[0]].to_numpy()
@@ -47,7 +47,6 @@ class Grangercalculator_distance:
             # calculates the value for which formula[0]**2/W must be smaller so that GC holds
             GC_Threshold = (variance_uni/tau_exp)
             distances.append([[tau, W, lower_bound, formula[0], Upperbound,  formula[0]**2/W, GC_Threshold], pair])
-            print(formula[0], formula[1], formula[2], xy)
 
         return distances
 

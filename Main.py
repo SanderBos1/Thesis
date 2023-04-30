@@ -3,6 +3,7 @@ from datetime import datetime
 import numpy as np
 
 from src.GC_calculation_distance import Grangercalculator_distance
+from src.VAR import Var
 from src.Pruning import Pruning
 import scipy.stats as stats
 
@@ -69,42 +70,48 @@ class Granger_investigation():
         df = df.apply(stats.zscore)
 
         ## The following code can be used to prune the dataset for testing purposes
-        # features_size = 500
-        # features = df.columns.tolist()
-        # stock = list(features[0:features_size])
-        # df = df[stock]
+        features_size = 10
+        features = df.columns.tolist()
+        stock = list(features[0:features_size])
+        df = df[stock]
 
         # # Helps with exploring the behaviour of distances between created models
         # # Stocks are of the form (X, Z), (Y, Z),(X, Y)
-        stocks = [[["MSFT", "AMGN"],["NEE", "AMGN"],["MSFT", "NEE"]], [["WY", "FCX"],["VRSK", "FCX"],["WY", "VRSK"]],
-                 [["LYB", "CFG"],["MCK", "CFG"],["LYB", "MCK"]],[["MTCH", "CTLT"],["GNRC", "CTLT"],
-                 ["MTCH", "GNRC"]], [["MPC", "LIN"],["LYV", "LIN"],["MPC", "LYV"]],[["NLOK", "CME"],["CVS", "CME"],
-                 ["NLOK", "CVS"]], [["PEG", "AKAM"],["EXPE", "AKAM"],["PEG", "EXPE"]],
-                [["EW", "ANSS"],["ESS", "ANSS"],["EW", "ESS"]],
-                [["VLO", "ABMD"], ["REGN", "ABMD"], ["VLO", "REGN"]], [["ALK", "AEP"],["CB", "AEP"],["ALK", "CB"]]]
+        # stocks = [[["MSFT", "AMGN"],["NEE", "AMGN"],["MSFT", "NEE"]], [["WY", "FCX"],["VRSK", "FCX"],["WY", "VRSK"]],
+        #          [["LYB", "CFG"],["MCK", "CFG"],["LYB", "MCK"]],[["MTCH", "CTLT"],["GNRC", "CTLT"],
+        #          ["MTCH", "GNRC"]], [["MPC", "LIN"],["LYV", "LIN"],["MPC", "LYV"]],[["NLOK", "CME"],["CVS", "CME"],
+        #          ["NLOK", "CVS"]], [["PEG", "AKAM"],["EXPE", "AKAM"],["PEG", "EXPE"]],
+        #         [["EW", "ANSS"],["ESS", "ANSS"],["EW", "ESS"]],
+        #         [["VLO", "ABMD"], ["REGN", "ABMD"], ["VLO", "REGN"]], [["ALK", "AEP"],["CB", "AEP"],["ALK", "CB"]]]
+        #
+        # # Calculates the window_size
+        # W = len(df["A"])-1
+        # print(W)
+        # #
+        # # calculates the lower, upper and threshold bounds.
+        # GC = Grangercalculator_distance(df, 1)
+        # answer = GC.GC_calculator(stocks, W, 0.005)
 
-        # Calculates the window_size
-        d1 = datetime.strptime(start_date, "%Y/%m/%d")
-        d2 = datetime.strptime(end_date, "%Y/%m/%d")
-        W = d2 - d1
-        W = W.days-1
-
-
-        GC = Grangercalculator_distance(df, 1)
-        answer = GC.GC_calculator(stocks, W, 0.05)
         # Aims to calculate Granger causality of requested pair or tuple of variables
         # investigation = Investigation()
         # answer = investigation.Granger_Causality(df, lag_sizes)
 
-       # Aims to calculate the pruning
-       #  df = self.znormalization(df)
-       #  pruning = Pruning(df)
-       #  root = pruning.set_root(df)
-       #  pruning.HierarchicalClustering(root, 4, 3, 0.8, 5, 2)
-       #  answer = 5
-        for i in answer:
-            print(i)
+        # calculates univariate variance
 
+        # Aims to calculate the pruning
+        pruning = Pruning(df)
+
+
+        clusters = pruning.clustering(3, 4)
+        calculated_clusters = []
+        best_univariate = []
+
+        for i in clusters:
+            answer = pruning.find_largest_univariate(i)
+            best_univariate.append(answer)
+            cluster_calculated = pruning.cluster_calculations(i)
+            calculated_clusters.append(cluster_calculated)
+        answer = pruning.pruning(calculated_clusters, best_univariate, clusters)
         return answer
 
 
