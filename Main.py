@@ -1,6 +1,9 @@
 from datetime import datetime
+from itertools import combinations
 
 import numpy as np
+from matplotlib import pyplot as plt
+from statistics import mean
 
 from src.GC_calculation_distance import Grangercalculator_distance
 from src.VAR import Var
@@ -53,7 +56,7 @@ class Granger_investigation():
     def execution(self):
         lag_sizes = [1]
         start_date = '2016/01/01'
-        end_date = '2016/05/01'
+        end_date = '2016/06/01'
 
         # Defines the period of a timestep, in this case a day
         sort_string = "D"
@@ -61,57 +64,50 @@ class Granger_investigation():
         index = "Date"
         # where the dataset is stored
         data_place = "Data/sp500_stocks.csv"
-        detrend = False
+
+        #Choose if you want to apply detrending by differencing.
+        detrend = True
+
         df = self.data_analyser(data_place, index, sort_string, detrend)
         # prunes the dataset on the desired time period
         df = df.loc[start_date:end_date]
         df = df.dropna(axis=1)
-        # z-normalizes the dataset (mean 0, var 1)
-        df = df.apply(stats.zscore)
 
-        ## The following code can be used to prune the dataset for testing purposes
-        features_size = 10
+        # z-normalizes the dataset (mean 0, var 1)
+        # df = df.apply(stats.zscore)
+
+        # The following code can be used to prune the dataset for testing purposes
+        features_size = 100
         features = df.columns.tolist()
         stock = list(features[0:features_size])
         df = df[stock]
 
-        # # Helps with exploring the behaviour of distances between created models
-        # # Stocks are of the form (X, Z), (Y, Z),(X, Y)
-        # stocks = [[["MSFT", "AMGN"],["NEE", "AMGN"],["MSFT", "NEE"]], [["WY", "FCX"],["VRSK", "FCX"],["WY", "VRSK"]],
-        #          [["LYB", "CFG"],["MCK", "CFG"],["LYB", "MCK"]],[["MTCH", "CTLT"],["GNRC", "CTLT"],
-        #          ["MTCH", "GNRC"]], [["MPC", "LIN"],["LYV", "LIN"],["MPC", "LYV"]],[["NLOK", "CME"],["CVS", "CME"],
-        #          ["NLOK", "CVS"]], [["PEG", "AKAM"],["EXPE", "AKAM"],["PEG", "EXPE"]],
-        #         [["EW", "ANSS"],["ESS", "ANSS"],["EW", "ESS"]],
-        #         [["VLO", "ABMD"], ["REGN", "ABMD"], ["VLO", "REGN"]], [["ALK", "AEP"],["CB", "AEP"],["ALK", "CB"]]]
-        #
-        # # Calculates the window_size
-        # W = len(df["A"])-1
-        # print(W)
-        # #
-        # # calculates the lower, upper and threshold bounds.
-        # GC = Grangercalculator_distance(df, 1)
-        # answer = GC.GC_calculator(stocks, W, 0.005)
 
-        # Aims to calculate Granger causality of requested pair or tuple of variables
-        # investigation = Investigation()
-        # answer = investigation.Granger_Causality(df, lag_sizes)
-
-        # calculates univariate variance
-
-        # Aims to calculate the pruning
-        pruning = Pruning(df)
+        # Calculates the window_size
+        W = len(df["A"])-1
 
 
-        clusters = pruning.clustering(3, 4)
-        calculated_clusters = []
-        best_univariate = []
+        investigation = Investigation()
 
-        for i in clusters:
-            answer = pruning.find_largest_univariate(i)
-            best_univariate.append(answer)
-            cluster_calculated = pruning.cluster_calculations(i)
-            calculated_clusters.append(cluster_calculated)
-        answer = pruning.pruning(calculated_clusters, best_univariate, clusters)
+        # # Aims to calculate Granger causality of requested list of pairs or tuples of variables
+        # variables = list(combinations(stock, 2))
+        #answer = investigation.Granger_Causality(df, 1, variables)
+
+        # Creates intervals of the Granger causality in a specific lag size
+        investigation.Count_intervals(df, [5], 2)
+
+        #plots different time-series
+        # investigation.plot_stocks(df, ["AMD", "PNC", "RJF"])
+
+        # Aims to calculate the percantage or accuracy of the combinations that can be pruned
+
+        amountClusters = [3, 6, 9, 12]
+        taus = [0.005, 0.05, 0.5, 1, 5]
+        allbipair = len(list(combinations(df.columns.tolist(), 2)))
+        pruning = Pruning(df, 6, allbipair)
+        pruning.verifyPruning(amountClusters, taus, allbipair)
+
+        answer = 5
         return answer
 
 

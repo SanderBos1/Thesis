@@ -16,7 +16,6 @@ class Grangercalculator_distance:
     def GC_calculator(self, bi_pairs, W, tau):
         distances = []
         tau_exp = math.exp(tau)
-
         for pair in bi_pairs:
             formula = []
             second_value = []
@@ -40,13 +39,11 @@ class Grangercalculator_distance:
                     data_uni = self.df[pair[j][1]].copy(deep=True)
                     VAR_uni = Var(data_uni, self.lag)
                     variance_uni = VAR_uni.var_univariate()
-
             xy = distance.euclidean(second_value[1], second_value[2])
             lower_bound = (abs(abs(abs(xy - formula[1]) - formula[2])-formula[2]))
             Upperbound = (formula[1] + xy + 2*formula[2])
             # calculates the value for which formula[0]**2/W must be smaller so that GC holds
             GC_Threshold = (variance_uni/tau_exp)
             distances.append([[tau, W, lower_bound, formula[0], Upperbound,  formula[0]**2/W, GC_Threshold], pair])
-
         return distances
 

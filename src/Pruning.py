@@ -1,28 +1,32 @@
+import itertools
 from itertools import combinations
 
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 
 from src.GC_calculation_distance import Grangercalculator_distance
 from src.VAR import Var
 from src.VAR_distance import Var_distance
+from src.support import Investigation
 
 
 class Pruning:
 
-    def __init__(self, df):
+    def __init__(self, df, K, lengthallbipairs):
         self.df = df
-        self.total_combinations = list(combinations(self.df.columns.tolist(), 2))
+        self.total_combinations = []
+        self.lengthallbipairs = lengthallbipairs
+        self.K = K
 
-
-    def clustering(self, K, init):
+    # diveds the time-series of the data set into clusters
+    def clustering(self, init):
         clusters = []
-
         # Convert DataFrame to matrix
         mat = self.df.values.T
         # Makes the clusters by using k-means
-        km = KMeans(n_clusters=K, init="k-means++", n_init= init)
+        km = KMeans(n_clusters=self.K, init="k-means++", n_init= init)
         km.fit(mat)
         # Get cluster assignment labels
         labels = km.labels_
@@ -31,13 +35,12 @@ class Pruning:
         results["stock"] = self.df.columns.tolist()
 
         # attached each cluster to its own list of stocks
-        for i in range(K):
+        for i in range(self.K):
             cluster = results[results[0] == i]
             clusters.append(cluster["stock"].tolist())
-        print(clusters)
         return clusters
 
-    # calculates the univariate model with the largest variance
+    # calculates the univariate model with the largest variance, since this has the largest bound.
     def find_largest_univariate(self, variables):
         answer = 0
         best_uni = 0
@@ -50,6 +53,7 @@ class Pruning:
                 best_uni = i
         return best_uni
 
+    # calculates the values that are needed for the bounds
     def cluster_calculations(self, cluster):
         cluster_values = []
         # calculates the vector autoregression model
@@ -71,52 +75,104 @@ class Pruning:
 
                 # returns the model (x GC y), the l2norm and the value mentioned above
                 cluster_values.append([combo, l2norm])
+
             return cluster_values
 
-    def pruning(self, clusters, best_univariate, stocks_of_clusters):
-
-        # calculates the largest bounds between two clusters
-        sum = 0
-        stockx = "empty"
-        stocky = "empty"
-
-        for i in clusters[1]:
-            distance = i[1]
-            if distance > sum:
-                sum = distance
-                stockx = i[0][0]
-                stocky = i[0][1]
-
-        stocks = [[[stockx, best_univariate[0]], [stocky,best_univariate[0]], [stockx, stocky]]]
-        # Calculates the window_size
-        W = len(self.df["A"])-1
-        #
-        # calculates the lower, upper and threshold bounds.
-        GC = Grangercalculator_distance(self.df, 1)
-        answer = GC.GC_calculator(stocks, W, 0.5)
-
-        bound_left = answer[0][0][2]**2/W
-        bound = answer[0][0][6]
-
-        print(bound_left)
-        print(bound)
-        if bound_left < bound:
-            print("keep")
-        else:
-            print(stocks_of_clusters)
-            stock = stocks_of_clusters[0]
-            stock.extend(stocks_of_clusters[1])
-            combinations_tobe_removed = list(combinations(stock, 2))
-            print("total", self.total_combinations)
-            print("these have to be removed", combinations_tobe_removed)
-            list_after_removing = set(self.total_combinations) - set(combinations_tobe_removed)
-            print("this is the list after removing", list_after_removing)
-            print(len(list_after_removing))
-            self.total_combinations = list_after_removing
-            print(len(list(self.total_combinations)))
-            print(len(list(combinations_tobe_removed)))
-            print(len(self.total_combinations))
-
-        return self.total_combinations
+    def pruning(self, clusters, best_univariate, stocks_of_clusters, tau):
 
 
+        all_removed_bicombinations = []
+
+        #adds all combinations inside the same cluster to the set that needs to be calculated.
+        for stocks_of_cluster in stocks_of_clusters:
+            if len(stocks_of_cluster) > 2:
+                self.total_combinations.extend(list(combinations(stocks_of_cluster, 2)))
+
+        list_of_clusternumbers = list(range(self.K))
+        list_of_pairsof_clusters = list(combinations(list_of_clusternumbers, 2))
+        # loops through each pair of clusters and checks if they can be removed from the combinations
+        # that need to be evalued.
+        for pair_of_clusters in list_of_pairsof_clusters:
+            dependent = pair_of_clusters[0]
+            independent = pair_of_clusters[1]
+            sum = 0
+            stockx = "empty"
+            stocky = "empty"
+            for i in clusters[independent]:
+                distance = i[1]
+                if distance > sum:
+                    sum = distance
+                    stockx = i[0][0]
+                    stocky = i[0][1]
+            stocks = [[[stockx, best_univariate[dependent]], [stocky,best_univariate[dependent]], [stockx, stocky]]]
+            # Calculates the window_size
+            W = len(self.df["A"])-1
+            # calculates the lower and  upper bound of the distance.
+            # Calculates the threshold for which Granger causality > tau holds.
+            GC = Grangercalculator_distance(self.df, 1)
+            answer = GC.GC_calculator(stocks, W, tau)
+
+            upper = answer[0][0][4]**2/W
+            lower = answer[0][0][2]**2/W
+            bound = answer[0][0][6]
+
+            if upper < bound:
+                combinations_tobe_added = list(itertools.product(stocks_of_clusters[dependent],stocks_of_clusters[independent]))
+                self.total_combinations.extend(combinations_tobe_added)
+            if lower > bound:
+                removed_bicombinations = list(itertools.product(stocks_of_clusters[dependent],stocks_of_clusters[independent]))
+                all_removed_bicombinations.extend(removed_bicombinations)
+            else:
+                combinations_tobe_added = list(itertools.product(stocks_of_clusters[dependent],stocks_of_clusters[independent]))
+                self.total_combinations.extend(combinations_tobe_added)
+
+
+        return self.total_combinations, all_removed_bicombinations, len(all_removed_bicombinations)/self.lengthallbipairs
+
+
+    def verifyPruning(self, amountClusters, taus, allbipairs):
+
+        for clusteramount in amountClusters:
+            all_percentages = []
+            all_accuracies = []
+            for i in range(5):
+                percantages = []
+                accuracies = []
+                pruning = Pruning(self.df, clusteramount, allbipairs)
+                clusters = pruning.clustering(10)
+                for tau in taus:
+                    calculated_clusters = []
+                    best_univariate = []
+                    for i in clusters:
+                        answer = pruning.find_largest_univariate(i)
+                        best_univariate.append(answer)
+                        cluster_calculated = pruning.cluster_calculations(i)
+                        calculated_clusters.append(cluster_calculated)
+                    added_combinations, removed_combinations, percentage = pruning.pruning(calculated_clusters,
+                                                                                       best_univariate, clusters, tau)
+
+                    investigation = Investigation()
+                    GC_real = investigation.Granger_Causality(self.df, 1, removed_combinations)
+                    sum = 0
+                    for i in GC_real:
+                        if i[0][1] < tau:
+                            sum = sum + 1
+                    if len(removed_combinations) == 0:
+                        accuracies.append(1)
+                    else:
+                        accuracies.append(sum/len(removed_combinations))
+                    percantages.append(percentage)
+
+                all_percentages.append(percantages)
+                all_accuracies.append(accuracies)
+                print(accuracies)
+
+            average_percentages = np.mean(all_percentages, axis=0)
+            average_accuracies = np.mean(all_accuracies, axis=0)
+
+            # choose to plot either the accuracies or percentages.
+            plt.plot(taus, average_accuracies, 'o')
+            plt.title("Pruning for " + str(clusteramount) + "clusters")
+            plt.xlabel("Tau")
+            plt.ylabel("accuracy percentage")
+            plt.show()
