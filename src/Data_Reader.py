@@ -2,32 +2,51 @@ import pandas as pd
 
 
 class DataManipulator:
-
     def __init__(self, csv):
         self.data = pd.read_csv(csv)
 
-    # converts the data to a python temporal dataset
     def prepare(self, period, index):
-        # data preparation
+        """
+        Converts the data to a Python temporal dataset.
+
+        Args:
+            period (str): The desired frequency of the index, e.g., 'D' for daily, 'M' for monthly.
+            index (str): The name of the column to set as the index.
+
+        Returns:
+            pandas.DataFrame: The prepared dataframe.
+        """
         df = self.data.set_index(index)
         df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
         df.index = pd.to_datetime(df.index)
         df.index = df.index.to_period(period)
         return df
 
-    # applies detreding to the dataframe
     def detrend(self, df):
+        """
+        Applies detrending to the dataframe.
+        Args:
+            df (pandas.DataFrame): The dataframe to detrend.
+        Returns:
+            pandas.DataFrame: The detrended dataframe.
+        """
         for column in df:
             df[column] = df[column].diff(periods=1)
-            # the following line can be uncommented to store the result in a csv file
+            # The following line can be uncommented to store the result in a CSV file
             # df.to_csv('Data/sp500_detrended.csv')
         return df
 
-    # the sp500 dataset is not in desired form, so this method makes sure that each column belongs to a unique stock
     def prep_sp500(self, df):
+        """
+        Prepares the sp500 dataset by ensuring each column belongs to a unique stock.
+        Args:
+            df (pandas.DataFrame): The dataframe to prepare.
+        Returns:
+            pandas.DataFrame: The prepared dataframe.
+        """
         keep = ['Symbol', 'High']
-        AllColumns = df.columns.tolist()
-        for column in AllColumns:
+        all_columns = df.columns.tolist()
+        for column in all_columns:
             if column not in keep:
                 df = df.drop(column, axis=1)
         df = df.pivot_table(index="Date", columns='Symbol', values="High")

@@ -1,20 +1,9 @@
-from datetime import datetime
 from itertools import combinations
 
-import numpy as np
-from matplotlib import pyplot as plt
-from statistics import mean
-
-from src.GC_calculation_distance import Grangercalculator_distance
-from src.VAR import Var
 from src.Pruning import Pruning
-import scipy.stats as stats
-
 from src.support import Investigation
 from src.top_k import TopK_improved
 from src.Data_Reader import DataManipulator
-from sklearn import preprocessing
-import pandas as pd
 import time
 
 
@@ -54,61 +43,46 @@ class Granger_investigation():
             print("the end")
 
     def execution(self):
-        lag_sizes = [1]
-        start_date = '2016/01/01'
-        end_date = '2016/06/01'
-
-        # Defines the period of a timestep, in this case a day
-        sort_string = "D"
-        # the time-index of the dataset
-        index = "Date"
-        # where the dataset is stored
-        data_place = "Data/sp500_stocks.csv"
-
-        #Choose if you want to apply detrending by differencing.
-        detrend = True
+        start_date = '2010/01/01'
+        end_date = '2010/06/01'
+        sort_string = "D"  # Defines the period of a timestep, in this case a day
+        index = "Date"  # The time-index of the dataset
+        data_place = "Data/sp500_stocks.csv"  # Where the dataset is stored
+        detrend = True  # Choose if you want to apply detrending by differencing
 
         df = self.data_analyser(data_place, index, sort_string, detrend)
-        # prunes the dataset on the desired time period
-        df = df.loc[start_date:end_date]
+        df = df.loc[start_date:end_date]  # Prunes the dataset on the desired time period
         df = df.dropna(axis=1)
-
-        # z-normalizes the dataset (mean 0, var 1)
-        # df = df.apply(stats.zscore)
-
+        # df = df.apply(stats.zscore)  # Z-normalizes the dataset (mean 0, var 1)
+        #
         # The following code can be used to prune the dataset for testing purposes
-        features_size = 100
-        features = df.columns.tolist()
-        stock = list(features[0:features_size])
-        df = df[stock]
+        # features_size = 100
+        # features = df.columns.tolist()
+        # stock = list(features[0:features_size])
+        # df = df[stock]
+
+        W = len(df["A"]) - 1 # Calculates the window_size
+
+        investigation = Investigation() #creates an investigation class
 
 
-        # Calculates the window_size
-        W = len(df["A"])-1
-
-
-        investigation = Investigation()
-
-        # # Aims to calculate Granger causality of requested list of pairs or tuples of variables
+        ## The following code aims to calculate Granger causality of requested list of pairs or tuples of variables
         # variables = list(combinations(stock, 2))
-        #answer = investigation.Granger_Causality(df, 1, variables)
+        # answer = investigation.Granger_Causality(df, 1, variables)
 
-        # Creates intervals of the Granger causality in a specific lag size
-        investigation.Count_intervals(df, [5], 2)
+        ## Creates intervals of the Granger causality in a specific lag size
+        # investigation.Count_intervals(df, [5], 2)
 
-        #plots different time-series
-        # investigation.plot_stocks(df, ["AMD", "PNC", "RJF"])
+        # plots selected time-series
+        investigation.plot_stocks(df, ["AEP", "HAS", "MCHP"])
 
-        # Aims to calculate the percantage or accuracy of the combinations that can be pruned
+        ## Aims to calculate the percantage or accuracy of the combinations that can be pruned
+        # amountClusters = [3, 6, 9, 12]
+        # taus = [0.005, 0.05, 0.5, 1, 5]
+        # allbipair = len(list(combinations(df.columns.tolist(), 2)))
+        # pruning = Pruning(df, 6, allbipair)
+        # pruning.verifyPruning(amountClusters, taus, allbipair)
 
-        amountClusters = [3, 6, 9, 12]
-        taus = [0.005, 0.05, 0.5, 1, 5]
-        allbipair = len(list(combinations(df.columns.tolist(), 2)))
-        pruning = Pruning(df, 6, allbipair)
-        pruning.verifyPruning(amountClusters, taus, allbipair)
-
-        answer = 5
-        return answer
 
 
 GC = Granger_investigation()

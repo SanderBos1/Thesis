@@ -4,7 +4,7 @@ from src.VAR import Var
 from pyspark.sql import SparkSession
 
 
-class WindowSize:
+class lagSize:
 
     def __init__(self, df, lag, features):
         self.df = df
