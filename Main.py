@@ -52,10 +52,10 @@ class Granger_investigation():
 
 
         # The following code can be used to prune the dataset for testing purposes
-        # features_size = 100
-        # features = df.columns.tolist()
-        # stock = list(features[0:features_size])
-        # df = df[stock]
+        features_size = 100
+        features = df.columns.tolist()
+        stock = list(features[0:features_size])
+        df = df[stock]
 
         W = len(df["A"]) - 1 # Calculates the window_size
 

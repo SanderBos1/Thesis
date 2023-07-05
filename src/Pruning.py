@@ -48,7 +48,7 @@ class Pruning:
         Returns:
             str: The name of the variable with the lowest variance.
         """
-        answer = 0
+        answer = 999
         best_uni = 0
         for i in variables:
             df2 = self.df[i]

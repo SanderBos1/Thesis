@@ -1,9 +1,23 @@
 All code is written using Python 3.9 in addition to pyspark.
 
+The following packages are used:
+
+itertools
+k_means_constrained
+math
+matplotlib
+numpy
+pandas
+Pip
+pyspark
+scipy
+statsmodels
+
+
 1)  Make sure that a map Data is created in the same folder as were Main.py is saved.
 2)  add the file sp500_stocks.csv to this Data map.
     This can be found by following the link given in the dataset description of Chapter 4 of this Thesis
 3)  Install all packages that are used in this project.
-4)  Run Main.py, uncommeting the code snippet that belongs to the experiment that you want to verify.
+4)  Run Main.py, uncommenting the code snippet that belongs to the experiment that you want to verify.
     These code snippet are found in def execution, including a description of their parameters.
 

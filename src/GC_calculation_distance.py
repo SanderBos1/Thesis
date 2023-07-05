@@ -1,7 +1,5 @@
 import math
 
-import numpy as np
-
 from src.VAR import Var
 from src.VAR_distance import Var_distance
 from scipy.spatial import distance
