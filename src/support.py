@@ -1,4 +1,5 @@
-from src.lag_size import lagSize
+from itertools import combinations
+
 from src.IntervalCount import CountInterval
 from src.GC_calculation import Grangercalculator
 import matplotlib.pyplot as plt
@@ -13,12 +14,12 @@ class Investigation:
         pass
 
     # Aims to find the models with the lowest, middle, and high  Granger causality value.
-    def take_GC(self, df, lag_sizes):
+    def take_GC(self, df, lag_sizes, nr_comb):
         for i in lag_sizes:
             features = df.columns.tolist()
-            window_experiment = lagSize(df, i, features)
+            variables = list(combinations(features, nr_comb))
+            all = self.Granger_Causality(df, i, variables)
             # parameters define how many variables you put in the casual relationships
-            all = window_experiment.finding_All_granger(3)
             first_below = all[0]
             second_below = all[1]
             first_up = all[-1]

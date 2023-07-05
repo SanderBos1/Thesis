@@ -4,7 +4,7 @@ from itertools import combinations
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
-from sklearn.cluster import KMeans
+from k_means_constrained import KMeansConstrained
 
 from src.GC_calculation_distance import Grangercalculator_distance
 from src.VAR import Var
@@ -29,7 +29,7 @@ class Pruning:
         """
         clusters = []
         mat = self.df.values.T
-        km = KMeans(n_clusters=self.K, init="k-means++", n_init=init)
+        km = KMeansConstrained(n_clusters=self.K,size_min=2, init = "k-means++")
         km.fit(mat)
         labels = km.labels_
         results = pd.DataFrame([labels]).T
@@ -42,11 +42,11 @@ class Pruning:
 
     def find_largest_univariate(self, variables):
         """
-        Calculates the univariate model with the largest variance.
+        Calculates the univariate model with the lowest variance.
         Args:
             variables (list): The list of stocks to consider.
         Returns:
-            str: The name of the variable with the largest variance.
+            str: The name of the variable with the lowest variance.
         """
         answer = 0
         best_uni = 0
@@ -54,7 +54,7 @@ class Pruning:
             df2 = self.df[i]
             var = Var(df2, 1)
             uni_var = var.var_univariate()
-            if uni_var > answer:
+            if uni_var < answer:
                 answer = uni_var
                 best_uni = i
         return best_uni
@@ -92,7 +92,6 @@ class Pruning:
         for stocks_of_cluster in stocks_of_clusters:
             if len(stocks_of_cluster) > 2:
                 self.total_combinations.extend(list(combinations(stocks_of_cluster, 2)))
-
         list_of_clusternumbers = list(range(self.K))
         list_of_pairsof_clusters = list(combinations(list_of_clusternumbers, 2))
 
@@ -129,7 +128,7 @@ class Pruning:
 
         return self.total_combinations, all_removed_bicombinations, len(all_removed_bicombinations) / self.lengthallbipairs
 
-    def verifyPruning(self, amountClusters, taus, allbipairs):
+    def verifyPruning(self, amountClusters, taus, allbipairs, accuracy):
         for clusteramount in amountClusters:
             all_percentages = []
             all_accuracies = []
@@ -163,13 +162,18 @@ class Pruning:
 
                 all_percentages.append(percantages)
                 all_accuracies.append(accuracies)
-                print(accuracies)
 
-            average_percentages = np.mean(all_percentages, axis=0)
-            average_accuracies = np.mean(all_accuracies, axis=0)
-
-            plt.plot(taus, average_accuracies, 'o')
-            plt.title("Pruning for " + str(clusteramount) + "clusters")
-            plt.xlabel("Tau")
-            plt.ylabel("accuracy percentage")
-            plt.show()
+            if accuracy is True:
+                average_accuracies = np.mean(all_accuracies, axis=0)
+                plt.plot(taus, average_accuracies, 'o')
+                plt.title("Pruning for " + str(clusteramount) + "clusters")
+                plt.xlabel("Tau")
+                plt.ylabel("accuracy percentage")
+                plt.show()
+            else:
+                average_percentages = np.mean(all_percentages, axis=0)
+                plt.plot(taus, average_percentages, 'o')
+                plt.title("Pruning for " + str(clusteramount) + "clusters")
+                plt.xlabel("Tau")
+                plt.ylabel("removed percentage")
+                plt.show()
