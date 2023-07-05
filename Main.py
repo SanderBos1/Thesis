@@ -52,10 +52,10 @@ class Granger_investigation():
 
 
         # The following code can be used to prune the dataset for testing purposes
-        features_size = 100
-        features = df.columns.tolist()
-        stock = list(features[0:features_size])
-        df = df[stock]
+        # features_size = 100
+        # features = df.columns.tolist()
+        # stock = list(features[0:features_size])
+        # df = df[stock]
 
         W = len(df["A"]) - 1 # Calculates the window_size
 
@@ -139,11 +139,11 @@ class Granger_investigation():
             Graphs that depicts the percentage pruned.
         """
 
-        amountClusters = [3, 6, 9, 12]
-        taus = [0.005, 0.05, 0.5, 1, 5]
-        allbipair = len(list(combinations(df.columns.tolist(), 2)))
-        pruning = Pruning(df, 10, allbipair)
-        pruning.verifyPruning(amountClusters, taus, allbipair, False)
+        # amountClusters = [3, 6, 9, 12]
+        # taus = [0.005, 0.05, 0.5, 1, 5]
+        # allbipair = len(list(combinations(df.columns.tolist(), 2)))
+        # pruning = Pruning(df, 10, allbipair)
+        # pruning.verifyPruning(amountClusters, taus, allbipair, False)
 
         """
         The following code is used to calculate the accuracy.
@@ -154,11 +154,11 @@ class Granger_investigation():
         Returns:
             Graphs that depict the percentage pruned.
         """
-        amountClusters = [3, 6, 9, 12]
-        taus = [0.005, 0.05, 0.5, 1, 5]
-        allbipair = len(list(combinations(df.columns.tolist(), 2)))
-        pruning = Pruning(df, 10, allbipair)
-        pruning.verifyPruning(amountClusters, taus, allbipair, True)
+        # amountClusters = [3, 6, 9, 12]
+        # taus = [0.005, 0.05, 0.5, 1, 5]
+        # allbipair = len(list(combinations(df.columns.tolist(), 2)))
+        # pruning = Pruning(df, 10, allbipair)
+        # pruning.verifyPruning(amountClusters, taus, allbipair, True)
 
 GC = Granger_investigation()
 start = time.time()
